@@ -21,6 +21,8 @@ func (s *Services) startUDP(service *Service) error {
 	s.list[service.key] = service
 	s.mutex.Unlock()
 
+	info := service.Info()
+
 	go func() {
 		for {
 			buffer := make([]byte, MAX_UDP_PACKET_SIZE)
@@ -30,7 +32,7 @@ func (s *Services) startUDP(service *Service) error {
 				continue
 			}
 
-			src, err := service.SrcFN(service.Info())
+			src, err := service.SrcFN(info)
 
 			if err != nil {
 				continue
