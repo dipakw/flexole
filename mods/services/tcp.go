@@ -20,7 +20,7 @@ func (s *Services) startTCPOrUnix(service *Service, dir string) error {
 		}
 	}
 
-	listener, err := net.Listen("unix", addr)
+	listener, err := net.Listen(service.Type, addr)
 
 	if err != nil {
 		return err
