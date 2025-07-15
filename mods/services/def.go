@@ -17,6 +17,7 @@ type Info struct {
 }
 
 type Service struct {
+	Group   string
 	Host    string
 	Port    uint16
 	Type    string
