@@ -18,6 +18,7 @@ func Manager(c *Config) *Services {
 
 func (s *Services) Start(service *Service) (*Service, error) {
 	service.key = fmt.Sprintf("%d", service.Port)
+	service.manager = s
 
 	if service.Type == "tcp" || service.Type == "unix" {
 		return service, s.startTCPOrUnix(service, s.conf.Dir)
@@ -40,7 +41,7 @@ func (s *Services) Stop(key string) error {
 		return errors.New("service not found")
 	}
 
-	return service.Stop()
+	return service.stop()
 }
 
 func (s *Services) Has(key string) bool {
@@ -61,7 +62,7 @@ func (s *Services) Reset() []error {
 	var errors = []error{}
 
 	for _, service := range s.list {
-		if err := service.Stop(); err != nil {
+		if err := service.stop(); err != nil {
 			errors = append(errors, err)
 		}
 	}

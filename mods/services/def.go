@@ -29,6 +29,7 @@ type Service struct {
 	sock     string
 	listener net.Listener
 	udpConn  *net.UDPConn
+	manager  *Services
 }
 
 type Config struct {
