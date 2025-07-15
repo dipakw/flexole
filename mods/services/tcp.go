@@ -8,7 +8,7 @@ import (
 )
 
 func (s *Services) startTCPOrUnix(service *Service, dir string) error {
-	addr := fmt.Sprintf("%s:%d", service.Host, service.Port)
+	addr := net.JoinHostPort(service.Host, fmt.Sprintf("%d", service.Port))
 
 	if service.Type == "unix" {
 		addr = path.Join(dir, fmt.Sprintf("%s.sock", service.key))
