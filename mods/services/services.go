@@ -34,14 +34,7 @@ func (s *Services) Start(service *Service) (*Service, error) {
 func (s *Services) Stop(key string) error {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
-
-	service, ok := s.list[key]
-
-	if !ok || service == nil {
-		return errors.New("service not found")
-	}
-
-	return service.stop()
+	return s.stop(key)
 }
 
 func (s *Services) Has(key string) bool {
@@ -61,11 +54,30 @@ func (s *Services) Reset() []error {
 
 	var errors = []error{}
 
-	for _, service := range s.list {
-		if err := service.stop(); err != nil {
+	for key := range s.list {
+		if err := s.stop(key); err != nil {
 			errors = append(errors, err)
 		}
 	}
 
 	return errors
+}
+
+/**
+ * PRIVATE METHODS BELOW.
+ */
+func (s *Services) stop(key string) error {
+	service, ok := s.list[key]
+
+	if !ok || service == nil {
+		return errors.New("service not found")
+	}
+
+	if err := service.stop(); err != nil {
+		return err
+	}
+
+	delete(s.list, key)
+
+	return nil
 }

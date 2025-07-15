@@ -14,6 +14,13 @@ func (s *Service) Key() string {
 	return s.key
 }
 
+func (s *Service) Stop() error {
+	return s.manager.Stop(s.key)
+}
+
+/**
+ * PRIVATE METHODS BELOW.
+ */
 func (s *Service) stop() error {
 	if s.Type == "udp" {
 		return s.udpConn.Close()
@@ -30,8 +37,4 @@ func (s *Service) stop() error {
 	}
 
 	return nil
-}
-
-func (s *Service) Stop() error {
-	return s.manager.Stop(s.key)
 }
