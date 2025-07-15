@@ -28,8 +28,7 @@ type Service struct {
 }
 
 type Config struct {
-	Group string
-	Dir   string
+	Dir string
 }
 
 type Services struct {
