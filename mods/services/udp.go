@@ -7,7 +7,9 @@ import (
 )
 
 func (s *Services) startUDP(service *Service) error {
-	conn, err := net.ListenUDP("udp", &net.UDPAddr{
+	var err error
+
+	service.udpConn, err = net.ListenUDP("udp", &net.UDPAddr{
 		IP:   net.ParseIP(service.Host),
 		Port: int(service.Port),
 	})
@@ -26,7 +28,7 @@ func (s *Services) startUDP(service *Service) error {
 	go func() {
 		for {
 			buffer := make([]byte, MAX_UDP_PACKET_SIZE)
-			n, addr, err := conn.ReadFromUDP(buffer)
+			n, addr, err := service.udpConn.ReadFromUDP(buffer)
 
 			if err != nil {
 				continue
@@ -56,7 +58,7 @@ func (s *Services) startUDP(service *Service) error {
 					return
 				}
 
-				if _, err = conn.WriteToUDP(buf[:n], addr); err != nil {
+				if _, err = service.udpConn.WriteToUDP(buf[:n], addr); err != nil {
 					fmt.Println("Failed to write to", "::", addr, "::", err)
 				}
 			}()

@@ -25,7 +25,10 @@ type Service struct {
 	SrcFN   func(*Info) (net.Conn, error)
 
 	// Internal.
-	key string
+	key      string
+	sock     string
+	listener net.Listener
+	udpConn  *net.UDPConn
 }
 
 type Config struct {
