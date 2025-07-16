@@ -17,7 +17,6 @@ type Info struct {
 }
 
 type Service struct {
-	Group   string
 	Host    string
 	Port    uint16
 	Type    string
@@ -25,19 +24,36 @@ type Service struct {
 	SrcFN   func(*Info) (net.Conn, error)
 
 	// Internal.
-	key      string
 	sock     string
 	listener net.Listener
 	udpConn  *net.UDPConn
-	manager  *Services
+	user     *User
 }
 
 type Config struct {
 	Dir string
 }
 
-type Services struct {
-	mutex sync.RWMutex
+type ServicesManager struct {
+	mu    sync.RWMutex
 	conf  *Config
-	list  map[string]*Service
+	tcp   map[uint16]bool
+	udp   map[uint16]bool
+	users map[string]*User
+}
+
+type User struct {
+	id  string
+	mu  sync.RWMutex
+	mgr *ServicesManager
+	dir string
+
+	// UDP services
+	udp map[uint16]*Service
+
+	// TCP services
+	tcp map[uint16]*Service
+
+	// Unix services
+	unix map[uint16]*Service
 }

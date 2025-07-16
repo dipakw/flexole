@@ -1,83 +1,67 @@
 package services
 
 import (
-	"errors"
-	"fmt"
+	"path"
 	"sync"
 )
 
-func Manager(c *Config) *Services {
-	instance := &Services{
-		mutex: sync.RWMutex{},
+func Manager(c *Config) *ServicesManager {
+	instance := &ServicesManager{
+		mu:    sync.RWMutex{},
 		conf:  c,
-		list:  map[string]*Service{},
+		users: map[string]*User{}, // List of users.
+		tcp:   map[uint16]bool{},  // Used TCP ports.
+		udp:   map[uint16]bool{},  // Used UDP ports.
 	}
 
 	return instance
 }
 
-func (s *Services) Start(service *Service) (*Service, error) {
-	service.key = fmt.Sprintf("%d", service.Port)
-	service.manager = s
-
-	if service.Type == "tcp" || service.Type == "unix" {
-		return service, s.startTCPOrUnix(service, s.conf.Dir)
+func (s *ServicesManager) User(id string) *User {
+	if id == "" {
+		return nil
 	}
 
-	if service.Type == "udp" {
-		return service, s.startUDP(service)
-	}
+	s.mu.RLock()
+	user, ok := s.users[id]
+	s.mu.RUnlock()
 
-	return nil, fmt.Errorf("invalid service type: %s", service.Type)
-}
+	if !ok || user == nil {
+		s.mu.Lock()
+		defer s.mu.Unlock()
 
-func (s *Services) Stop(key string) error {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-	return s.stop(key)
-}
-
-func (s *Services) Has(key string) bool {
-	s.mutex.RLock()
-	defer s.mutex.RUnlock()
-
-	if service, ok := s.list[key]; !ok || service == nil {
-		return false
-	}
-
-	return true
-}
-
-func (s *Services) Reset() []error {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-
-	var errors = []error{}
-
-	for key := range s.list {
-		if err := s.stop(key); err != nil {
-			errors = append(errors, err)
+		user = &User{
+			id:   id,
+			mgr:  s,
+			dir:  path.Join(s.conf.Dir, id),
+			udp:  map[uint16]*Service{},
+			tcp:  map[uint16]*Service{},
+			unix: map[uint16]*Service{},
 		}
+
+		s.users[id] = user
 	}
 
-	return errors
+	return user
 }
 
-/**
- * PRIVATE METHODS BELOW.
- */
-func (s *Services) stop(key string) error {
-	service, ok := s.list[key]
+func (s *ServicesManager) HasUser(id string) bool {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	user, ok := s.users[id]
+	return ok && user != nil
+}
 
-	if !ok || service == nil {
-		return errors.New("service not found")
+func (s *ServicesManager) Reset() []error {
+	errs := []error{}
+
+	for _, user := range s.users {
+		if user == nil {
+			continue
+		}
+
+		errs = append(errs, user.Reset()...)
 	}
 
-	if err := service.stop(); err != nil {
-		return err
-	}
-
-	delete(s.list, key)
-
-	return nil
+	return errs
 }

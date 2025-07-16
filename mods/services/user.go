@@ -1,0 +1,82 @@
+package services
+
+import "fmt"
+
+func (u *User) Start(background bool, service *Service) (*Service, error) {
+	service.user = u
+
+	if !u.Available(service.Type, service.Port) {
+		return nil, fmt.Errorf("port %d is not available", service.Port)
+	}
+
+	if service.Type == "tcp" || service.Type == "unix" {
+		return service, u.startTCPOrUnix(service, background)
+	}
+
+	if service.Type == "udp" {
+		return service, u.startUDP(service, background)
+	}
+
+	return nil, fmt.Errorf("invalid service type: %s", service.Type)
+}
+
+func (u *User) Available(network string, port uint16) bool {
+	if network == "unix" {
+		u.mu.RLock()
+		defer u.mu.RUnlock()
+		service, ok := u.unix[port]
+		return !ok || service == nil
+	}
+
+	if network == "tcp" {
+		u.mgr.mu.RLock()
+		defer u.mgr.mu.RUnlock()
+		status, ok := u.mgr.tcp[port]
+		return !ok || !status
+	}
+
+	if network == "udp" {
+		u.mgr.mu.RLock()
+		defer u.mgr.mu.RUnlock()
+		status, ok := u.mgr.udp[port]
+		return !ok || !status
+	}
+
+	return false
+}
+
+func (u *User) Stop(network string, port uint16) error {
+	u.mu.RLock()
+	service, ok := u.unix[port]
+	u.mu.RUnlock()
+
+	if !ok || service == nil {
+		return nil
+	}
+
+	return service.Stop()
+}
+
+func (u *User) Reset() []error {
+	errs := []error{}
+
+	types := []map[uint16]*Service{
+		u.unix,
+		u.tcp,
+		u.udp,
+	}
+
+	for _, services := range types {
+		for _, service := range services {
+			if service == nil {
+				continue
+			}
+
+			if err := service.Stop(); err != nil {
+				errs = append(errs, err)
+			}
+		}
+	}
+
+	return errs
+}

@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func (s *Services) startUDP(service *Service) error {
+func (u *User) startUDP(service *Service, background bool) error {
 	var err error
 
 	service.udpConn, err = net.ListenUDP("udp", &net.UDPAddr{
@@ -18,14 +18,19 @@ func (s *Services) startUDP(service *Service) error {
 		return err
 	}
 
-	// Add service to the list.
-	s.mutex.Lock()
-	s.list[service.key] = service
-	s.mutex.Unlock()
+	// Add service to the user's list.
+	u.mu.Lock()
+	u.udp[service.Port] = service
+	u.mu.Unlock()
+
+	// Add service to the manager's list.
+	u.mgr.mu.Lock()
+	u.mgr.udp[service.Port] = true
+	u.mgr.mu.Unlock()
 
 	info := service.Info()
 
-	go func() {
+	run := func() {
 		for {
 			buffer := make([]byte, MAX_UDP_PACKET_SIZE)
 			n, addr, err := service.udpConn.ReadFromUDP(buffer)
@@ -63,7 +68,13 @@ func (s *Services) startUDP(service *Service) error {
 				}
 			}()
 		}
-	}()
+	}
+
+	if background {
+		go run()
+	} else {
+		run()
+	}
 
 	return nil
 }

@@ -7,11 +7,11 @@ import (
 	"path"
 )
 
-func (s *Services) startTCPOrUnix(service *Service, dir string) error {
+func (u *User) startTCPOrUnix(service *Service, background bool) error {
 	addr := net.JoinHostPort(service.Host, fmt.Sprintf("%d", service.Port))
 
 	if service.Type == "unix" {
-		addr = path.Join(dir, fmt.Sprintf("%s.sock", service.key))
+		addr = path.Join(u.dir, fmt.Sprintf("%d.sock", service.Port))
 
 		if _, err := os.Stat(addr); err == nil {
 			if err := os.Remove(addr); err != nil {
@@ -34,14 +34,27 @@ func (s *Services) startTCPOrUnix(service *Service, dir string) error {
 		return err
 	}
 
-	// Add service to the list.
-	s.mutex.Lock()
-	s.list[service.key] = service
-	s.mutex.Unlock()
+	if service.Type == "tcp" {
+		// Add service to the user's list.
+		u.mu.Lock()
+		u.tcp[service.Port] = service
+		u.mu.Unlock()
+
+		// Add service to the manager's list.
+		u.mgr.mu.Lock()
+		u.mgr.tcp[service.Port] = true
+		u.mgr.mu.Unlock()
+	}
+
+	if service.Type == "unix" {
+		u.mu.Lock()
+		u.unix[service.Port] = service
+		u.mu.Unlock()
+	}
 
 	info := service.Info()
 
-	go func() {
+	run := func() {
 		for {
 			conn, err := service.listener.Accept()
 
@@ -58,7 +71,13 @@ func (s *Services) startTCPOrUnix(service *Service, dir string) error {
 
 			go relay(conn, src)
 		}
-	}()
+	}
+
+	if background {
+		go run()
+	} else {
+		run()
+	}
 
 	return nil
 }
