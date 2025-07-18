@@ -1,0 +1,10 @@
+github.com/dipakw/uconn v1.0.0 h1:1S6HumLX7EE2FO06KqEWwkpVKCq8hLiTgzo+phy6qJM=
+github.com/dipakw/uconn v1.0.0/go.mod h1:51R8TmyACPYPlHHwWgnmhrWWq4+tq4TaHqHLiauqG/w=
+github.com/dipakw/uconn v1.1.0 h1:M3lZSXBX//HM5CY/K1+WEQYS1HVhap83CU8y9a/Lga4=
+github.com/dipakw/uconn v1.1.0/go.mod h1:51R8TmyACPYPlHHwWgnmhrWWq4+tq4TaHqHLiauqG/w=
+github.com/dipakw/uconn v1.1.1 h1:znqMJczO9t9P3BSpawztHrnwflAflToSfNybueS18ho=
+github.com/dipakw/uconn v1.1.1/go.mod h1:51R8TmyACPYPlHHwWgnmhrWWq4+tq4TaHqHLiauqG/w=
+github.com/xtaci/smux v1.5.34 h1:OUA9JaDFHJDT8ZT3ebwLWPAgEfE6sWo2LaTy3anXqwg=
+github.com/xtaci/smux v1.5.34/go.mod h1:OMlQbT5vcgl2gb49mFkYo6SMf+zP3rcjcwQz7ZU7IGY=
+golang.org/x/crypto v0.40.0 h1:r4x+VvoG5Fm+eJcxMaY8CQM7Lb0l1lsmjGBQ6s8BfKM=
+golang.org/x/crypto v0.40.0/go.mod h1:Qr1vMER5WyS2dfPHAlsOj01wgLbsyWtFn/aY+5+ZdxY=
