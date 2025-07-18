@@ -1,17 +1,18 @@
 package services
 
 import (
+	"context"
 	"io"
 	"net"
 	"sync"
 )
 
-func relay(src, dst net.Conn) {
+func relay(ctx context.Context, src, dst net.Conn) {
 	var wg sync.WaitGroup
 	wg.Add(2)
 
-	// Channel to signal when either connection is closed
-	done := make(chan struct{})
+	// Channel to signal when either connection is closed or context is done
+	done := make(chan struct{}, 1)
 
 	// Copy from src to dst
 	go func() {
@@ -21,10 +22,9 @@ func relay(src, dst net.Conn) {
 		_, err := io.Copy(dst, src)
 
 		if err != nil {
-			// Log error if needed, but don't panic
 			select {
-			case done <- struct{}{}: // Signal other goroutine to close
-			default: // Channel might be closed or full
+			case done <- struct{}{}:
+			default:
 			}
 		}
 	}()
@@ -37,17 +37,19 @@ func relay(src, dst net.Conn) {
 		_, err := io.Copy(src, dst)
 
 		if err != nil {
-			// Log error if needed, but don't panic
 			select {
-			case done <- struct{}{}: // Signal other goroutine to close
-			default: // Channel might be closed or full
+			case done <- struct{}{}:
+			default:
 			}
 		}
 	}()
 
-	// Wait for one direction to complete, then close both connections
+	// Close both connections on either copy error or context cancellation
 	go func() {
-		<-done
+		select {
+		case <-done:
+		case <-ctx.Done():
+		}
 		src.Close()
 		dst.Close()
 	}()

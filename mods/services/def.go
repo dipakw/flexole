@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"net"
 	"sync"
 	"time"
@@ -28,6 +29,8 @@ type Service struct {
 	listener net.Listener
 	udpConn  *net.UDPConn
 	user     *User
+	ctx      context.Context
+	cancel   context.CancelFunc
 }
 
 type Config struct {

@@ -5,6 +5,7 @@ import (
 	"net"
 	"os"
 	"path"
+	"strings"
 )
 
 func (u *User) startTCPOrUnix(service *Service, background bool) error {
@@ -35,14 +36,13 @@ func (u *User) startTCPOrUnix(service *Service, background bool) error {
 	}
 
 	if service.Type == "tcp" {
-		// Add service to the user's list.
 		u.mu.Lock()
-		u.tcp[service.Port] = service
-		u.mu.Unlock()
-
-		// Add service to the manager's list.
 		u.mgr.mu.Lock()
+
+		u.tcp[service.Port] = service
 		u.mgr.tcp[service.Port] = true
+
+		u.mu.Unlock()
 		u.mgr.mu.Unlock()
 	}
 
@@ -55,21 +55,32 @@ func (u *User) startTCPOrUnix(service *Service, background bool) error {
 	info := service.Info()
 
 	run := func() {
+		defer service.listener.Close()
+
 		for {
-			conn, err := service.listener.Accept()
+			select {
+			case <-service.ctx.Done():
+				return
+			default:
+				conn, err := service.listener.Accept()
 
-			if err != nil {
-				continue
+				if err != nil {
+					if strings.Contains(err.Error(), "closed") {
+						return
+					}
+
+					continue
+				}
+
+				src, err := service.SrcFN(info)
+
+				if err != nil {
+					conn.Close()
+					continue
+				}
+
+				go relay(service.ctx, conn, src)
 			}
-
-			src, err := service.SrcFN(info)
-
-			if err != nil {
-				conn.Close()
-				continue
-			}
-
-			go relay(conn, src)
 		}
 	}
 

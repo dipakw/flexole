@@ -1,6 +1,9 @@
 package services
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 func (u *User) Start(background bool, service *Service) (*Service, error) {
 	service.user = u
@@ -8,6 +11,8 @@ func (u *User) Start(background bool, service *Service) (*Service, error) {
 	if !u.Available(service.Type, service.Port) {
 		return nil, fmt.Errorf("port %d is not available", service.Port)
 	}
+
+	service.ctx, service.cancel = context.WithCancel(context.Background())
 
 	if service.Type == "tcp" || service.Type == "unix" {
 		return service, u.startTCPOrUnix(service, background)
@@ -47,7 +52,9 @@ func (u *User) Available(network string, port uint16) bool {
 
 func (u *User) Stop(network string, port uint16) error {
 	u.mu.Lock()
+	u.mgr.mu.Lock()
 	defer u.mu.Unlock()
+	defer u.mgr.mu.Unlock()
 
 	var service *Service
 	var ok bool
