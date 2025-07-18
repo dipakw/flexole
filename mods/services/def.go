@@ -12,12 +12,14 @@ const (
 )
 
 type Info struct {
+	ID   uint16
 	Host string
 	Port uint16
 	Type string
 }
 
 type Service struct {
+	ID      uint16
 	Host    string
 	Port    uint16
 	Type    string

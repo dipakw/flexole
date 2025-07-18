@@ -6,6 +6,7 @@ import (
 
 func (s *Service) Info() *Info {
 	return &Info{
+		ID:   s.ID,
 		Host: s.Host,
 		Port: s.Port,
 		Type: s.Type,
