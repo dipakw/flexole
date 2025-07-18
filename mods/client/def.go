@@ -1,0 +1,72 @@
+package client
+
+import (
+	"context"
+	"net"
+	"sync"
+
+	"github.com/xtaci/smux"
+)
+
+type Config struct {
+	Server *Addr
+	Pipes  []string
+
+	EncAlgo uint8
+	EncKey  []byte
+}
+
+type Client struct {
+	conf     *Config
+	mu       sync.RWMutex
+	wg       sync.WaitGroup
+	Pipes    *Pipes
+	pipes    map[string]*aPipe
+	services map[uint16]*Service
+	ctx      context.Context
+	cancel   context.CancelFunc
+}
+
+type Addr struct {
+	Net  string
+	Addr string
+}
+
+type Pipe struct {
+	ID      string
+	Encrypt bool
+}
+
+type Pipes struct {
+	c *Client
+}
+
+type Local struct {
+	Net  string
+	Addr string
+}
+
+type Remote struct {
+	ID    uint16   `json:"id"`
+	Net   string   `json:"net"`
+	Port  uint16   `json:"port"`
+	Pipes []string `json:"pipes"`
+}
+
+type Service struct {
+	Local  *Local
+	Remote *Remote
+}
+
+type NetPort struct {
+	Net  string
+	Port uint16
+}
+
+type aPipe struct {
+	id     string
+	active bool
+	conn   net.Conn
+	sess   *smux.Session
+	ctrl   *smux.Stream
+}
