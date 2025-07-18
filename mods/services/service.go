@@ -1,6 +1,8 @@
 package services
 
-import "os"
+import (
+	"os"
+)
 
 func (s *Service) Info() *Info {
 	return &Info{

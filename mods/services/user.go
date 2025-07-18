@@ -46,15 +46,26 @@ func (u *User) Available(network string, port uint16) bool {
 }
 
 func (u *User) Stop(network string, port uint16) error {
-	u.mu.RLock()
-	service, ok := u.unix[port]
-	u.mu.RUnlock()
+	u.mu.Lock()
+	defer u.mu.Unlock()
+
+	var service *Service
+	var ok bool
+
+	switch network {
+	case "unix":
+		service, ok = u.unix[port]
+	case "tcp":
+		service, ok = u.tcp[port]
+	case "udp":
+		service, ok = u.udp[port]
+	}
 
 	if !ok || service == nil {
 		return nil
 	}
 
-	return service.Stop()
+	return service.stop()
 }
 
 func (u *User) Reset() []error {
