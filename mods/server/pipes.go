@@ -1,21 +1,43 @@
 package server
 
-func (s *Server) AddPipe(pipe *Pipe) *Pipe {
-	user := s.User(pipe.userID)
+import "net"
 
-	user.mu.Lock()
-	defer user.mu.Unlock()
-
-	user.pipes[pipe.id] = pipe
+func (pp *Pipes) add(pipe *Pipe) *Pipe {
+	pp.user.mu.Lock()
+	defer pp.user.mu.Unlock()
+	pp.user.pipesList[pipe.id] = pipe
 
 	return pipe
 }
 
-func (s *Server) RemPipe(userID string, pipeID string) {
-	user := s.User(userID)
+func (pp *Pipes) rem(id string) *Pipe {
+	pp.user.mu.Lock()
+	defer pp.user.mu.Unlock()
+	pipe, ok := pp.user.pipesList[id]
 
-	user.mu.Lock()
-	defer user.mu.Unlock()
+	if !ok || pipe == nil {
+		return nil
+	}
 
-	delete(user.pipes, pipeID)
+	delete(pp.user.pipesList, id)
+
+	return pipe
+}
+
+func (pp *Pipes) purge() error {
+	pp.user.mu.RLock()
+
+	conns := make(map[string]net.Conn)
+
+	for i, pipe := range pp.user.pipesList {
+		conns[i] = pipe.conn
+	}
+
+	pp.user.mu.RUnlock()
+
+	for _, conn := range conns {
+		conn.Close()
+	}
+
+	return nil
 }

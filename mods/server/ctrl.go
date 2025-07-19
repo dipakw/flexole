@@ -1,46 +1,60 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"flexole/mods/cmd"
-	"flexole/mods/services"
-	"fmt"
-	"net"
+	"io"
 )
 
-func (s *Server) listenCtrl(pipe *Pipe) {
+func (s *Server) listenCtrl(ctx context.Context, pipe *Pipe) {
+	defer pipe.ctrl.Close()
+
 	buf := make([]byte, 256)
 
 	for {
-		n, err := pipe.ctrl.Read(buf)
-
-		if err != nil {
-			fmt.Println("Failed to read control command:", err)
-			break
-		}
-
-		command := (&cmd.Cmd{}).Unpack(buf[:n])
-
-		if command == nil {
-			fmt.Println("Failed to unpack command")
-			continue
-		}
-
-		status := cmd.CMD_STATUS_UNKNOWN
-
-		switch command.ID {
-		case cmd.CMD_EXPOSE:
-			status = s.cmdExpose(pipe.userID, command.Data)
-		case cmd.CMD_DISPOSE:
-			status = s.cmdDispose(pipe.userID, command.Data)
-		case cmd.CMD_SHUTDOWN:
-			status = s.cmdShutdown(pipe.userID)
+		select {
+		case <-ctx.Done():
+			return
 		default:
-			status = cmd.CMD_INVALID_CMD
-		}
+			n, err := pipe.ctrl.Read(buf)
 
-		pipe.ctrl.Write(cmd.New(status, nil).Pack())
+			if err == io.EOF {
+				return
+			}
+
+			if err != nil {
+				s.conf.Log.Wrn("Failed to read control command:", err)
+				return
+			}
+
+			command := (&cmd.Cmd{}).Unpack(buf[:n])
+
+			if command == nil {
+				s.conf.Log.Err("Failed to unpack command:", buf[:20])
+				continue
+			}
+
+			s.handleCommand(command, pipe)
+		}
 	}
+}
+
+func (s *Server) handleCommand(command *cmd.Cmd, pipe *Pipe) {
+	status := cmd.CMD_STATUS_UNKNOWN
+
+	switch command.ID {
+	case cmd.CMD_EXPOSE:
+		status = s.cmdExpose(pipe.userID, command.Data)
+	case cmd.CMD_DISPOSE:
+		status = s.cmdDispose(pipe.userID, command.Data)
+	case cmd.CMD_SHUTDOWN:
+		status = s.cmdShutdown(pipe.userID)
+	default:
+		status = cmd.CMD_INVALID_CMD
+	}
+
+	pipe.ctrl.Write(cmd.New(status, nil).Pack())
 }
 
 func (s *Server) cmdExpose(userID string, data []byte) uint8 {
@@ -50,74 +64,28 @@ func (s *Server) cmdExpose(userID string, data []byte) uint8 {
 		return cmd.CMD_MALFORMED_DATA
 	}
 
-	user := s.conf.Manager.User(userID)
-
-	if !user.Available(service.Net, service.Port) {
-		return cmd.CMD_PORT_UNAVAIL
-	}
-
-	_, err := user.Start(true, &services.Service{
-		ID:   service.ID,
-		Host: "",
-		Port: service.Port,
-		Type: service.Net,
-
-		SrcFN: func(info *services.Info) (net.Conn, error) {
-			return s.srcfn(userID, info)
-		},
-	})
-
-	if err != nil {
-		return cmd.CMD_OP_FAILED
-	}
-
 	// Add service to server user services list.
-	serverUser := s.User(userID)
-	serverUser.mu.Lock()
-	defer serverUser.mu.Unlock()
-	serverUser.services[service.ID] = &service
+	_, status := s.User(userID).services.add(&service)
 
-	return cmd.CMD_STATUS_OK
+	return status
 }
 
 func (s *Server) cmdDispose(userID string, data []byte) uint8 {
-	var netPort NetPort
+	id := cmd.UnpackUint16(data)
+	_, status := s.User(userID).services.rem(id)
 
-	if err := json.Unmarshal(data, &netPort); err != nil {
-		return cmd.CMD_MALFORMED_DATA
-	}
-
-	user := s.conf.Manager.User(userID)
-
-	if err := user.Stop(netPort.Net, netPort.Port); err != nil {
-		return cmd.CMD_OP_FAILED
-	}
-
-	return cmd.CMD_STATUS_OK
+	return status
 }
 
 func (s *Server) cmdShutdown(userID string) uint8 {
+	// Get user.
+	user := s.User(userID)
+
 	// Stop all services.
-	s.conf.Manager.User(userID).Reset()
+	user.services.purge()
 
 	// Close all pipes.
-	user := s.User(userID)
-	user.mu.Lock()
-	defer user.mu.Unlock()
-
-	for _, pipe := range user.pipes {
-		if pipe.ctrl != nil {
-			pipe.ctrl.Close()
-		}
-
-		pipe.sess.Close()
-		pipe.conn.Close()
-	}
-
-	// Remove user from the list.
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	delete(s.users, userID)
+	user.pipes.purge()
 
 	return cmd.CMD_STATUS_OK
 }

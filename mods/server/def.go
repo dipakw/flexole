@@ -1,10 +1,12 @@
 package server
 
 import (
+	"context"
 	"flexole/mods/services"
 	"net"
 	"sync"
 
+	"github.com/dipakw/logs"
 	"github.com/xtaci/smux"
 )
 
@@ -12,6 +14,7 @@ type Config struct {
 	Net     string
 	Addr    string
 	Manager *services.ServicesManager
+	Log     logs.Log
 
 	EncFN  func(a *Auth, c net.Conn) (uint8, []byte, error)
 	AuthFN func(c net.Conn) (*Auth, error)
@@ -28,13 +31,29 @@ type Server struct {
 	listener net.Listener
 	mu       sync.RWMutex
 	users    map[string]*User
+	ctx      context.Context
+	cancel   context.CancelFunc
+	wg       sync.WaitGroup
 }
 
 type User struct {
-	id       string
-	mu       sync.RWMutex
-	pipes    map[string]*Pipe
-	services map[uint16]*Service
+	id           string
+	mu           sync.RWMutex
+	pipesList    map[string]*Pipe
+	servicesList map[uint16]*Service
+	pipes        *Pipes
+	services     *Services
+}
+
+type Services struct {
+	user   *User
+	server *Server
+}
+
+type Pipes struct {
+	user   *User
+	server *Server
+	muon   bool
 }
 
 type Pipe struct {

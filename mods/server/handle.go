@@ -1,29 +1,28 @@
 package server
 
 import (
+	"context"
 	"flexole/mods/cmd"
-	"fmt"
 	"net"
 
-	"github.com/dipakw/uconn"
 	"github.com/xtaci/smux"
 )
 
-func (s *Server) handle(conn net.Conn) {
+func (s *Server) handle(ctx context.Context, conn net.Conn) {
 	defer conn.Close()
 
 	// Authenticate.
 	auth, err := s.conf.AuthFN(conn)
 
 	if err != nil {
-		fmt.Println("Auth failed:", err)
+		s.conf.Log.Errf("Authentication failed: (%s) : %s", conn.RemoteAddr(), err.Error())
 		return
 	}
 
 	// Set up encryption if needed.
 	useConn := conn
 
-	if auth.Encrypt {
+	/*if auth.Encrypt {
 		algo, key, err := s.conf.EncFN(auth, conn)
 
 		if err != nil {
@@ -40,13 +39,13 @@ func (s *Server) handle(conn net.Conn) {
 			fmt.Println("Failed to create enc conn:", err)
 			return
 		}
-	}
+	}*/
 
 	// Init mux.
 	sess, err := smux.Server(useConn, smux.DefaultConfig())
 
 	if err != nil {
-		fmt.Println("Failed to create mux session:", err)
+		s.conf.Log.Errf("Failed to create mux session: (%s) : %s", conn.RemoteAddr(), err.Error())
 		return
 	}
 
@@ -54,18 +53,18 @@ func (s *Server) handle(conn net.Conn) {
 	ctrl, err := sess.OpenStream()
 
 	if err != nil {
-		fmt.Println("Failed to open control stream:", err)
+		s.conf.Log.Errf("Failed to open control stream: (%s) : %s", conn.RemoteAddr(), err.Error())
 		return
 	}
 
 	// Send control command.
 	if _, err := ctrl.Write(cmd.New(cmd.CMD_OPEN_CTRL_CHAN, nil).Pack()); err != nil {
-		fmt.Println("Failed to send control chan command:", err)
+		s.conf.Log.Errf("Failed to send control chan command: (%s) : %s", conn.RemoteAddr(), err.Error())
 		return
 	}
 
 	// Add pipe.
-	pipe := s.AddPipe(&Pipe{
+	pipe := s.User(auth.UserID).pipes.add(&Pipe{
 		userID: auth.UserID,
 		id:     auth.PipeID,
 		active: true,
@@ -75,17 +74,27 @@ func (s *Server) handle(conn net.Conn) {
 	})
 
 	// Listen for control commands.
-	go s.listenCtrl(pipe)
+	go s.listenCtrl(ctx, pipe)
 
-	defer s.RemPipe(auth.UserID, auth.PipeID)
-	defer sess.Close()
+	defer func() {
+		// Remove pipe.
+		s.User(auth.UserID).pipes.rem(auth.PipeID)
+
+		// Log.
+		s.conf.Log.Inff("Pipe removed: (%s) | user: %s | pipe: %s", conn.RemoteAddr(), auth.UserID, auth.PipeID)
+	}()
 
 	// To detect broken pipes.
 	for {
-		_, err := sess.AcceptStream()
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			_, err := sess.AcceptStream()
 
-		if err != nil {
-			break
+			if err != nil {
+				return
+			}
 		}
 	}
 }

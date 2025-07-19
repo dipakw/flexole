@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"sync"
@@ -19,7 +20,10 @@ func New(c *Config) (*Server, error) {
 		conf:  c,
 		mu:    sync.RWMutex{},
 		users: map[string]*User{},
+		wg:    sync.WaitGroup{},
 	}
+
+	instance.ctx, instance.cancel = context.WithCancel(context.Background())
 
 	return instance, nil
 }
@@ -31,10 +35,20 @@ func (s *Server) User(id string) *User {
 
 	if !ok || user == nil {
 		user = &User{
-			id:       id,
-			mu:       sync.RWMutex{},
-			pipes:    map[string]*Pipe{},
-			services: map[uint16]*Service{},
+			id:           id,
+			mu:           sync.RWMutex{},
+			pipesList:    map[string]*Pipe{},
+			servicesList: map[uint16]*Service{},
+		}
+
+		user.pipes = &Pipes{
+			user:   user,
+			server: s,
+		}
+
+		user.services = &Services{
+			user:   user,
+			server: s,
 		}
 
 		s.mu.Lock()
@@ -45,7 +59,7 @@ func (s *Server) User(id string) *User {
 	return user
 }
 
-func (s *Server) Start(background bool) error {
+func (s *Server) Start() error {
 	var err error
 
 	s.listener, err = net.Listen(s.conf.Net, s.conf.Addr)
@@ -54,31 +68,39 @@ func (s *Server) Start(background bool) error {
 		return nil
 	}
 
-	var run = func() error {
+	s.wg.Add(1)
+
+	go func() {
+		defer s.wg.Done()
+		defer s.listener.Close()
+
 		for {
-			conn, err := s.listener.Accept()
+			select {
+			case <-s.ctx.Done():
+				return
+			default:
+				conn, err := s.listener.Accept()
 
-			if err != nil {
-				fmt.Println("ERR:", err)
-				continue
+				if err != nil {
+					fmt.Println("ERR:", err)
+					continue
+				}
+
+				go s.handle(s.ctx, conn)
 			}
-
-			go s.handle(conn)
 		}
-	}
+	}()
 
-	if background {
-		go run()
-		return nil
-	}
+	return nil
+}
 
-	return run()
+func (s *Server) Wait() {
+	s.wg.Wait()
 }
 
 func (s *Server) Stop() error {
-	if s.listener != nil {
-		return s.listener.Close()
-	}
-
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.cancel()
 	return nil
 }

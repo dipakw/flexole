@@ -12,7 +12,7 @@ func (s *Server) srcfn(userID string, info *services.Info) (net.Conn, error) {
 
 	var pipe *Pipe
 
-	for _, p := range user.pipes {
+	for _, p := range user.pipesList {
 		if p.active {
 			pipe = p
 			break
@@ -20,7 +20,7 @@ func (s *Server) srcfn(userID string, info *services.Info) (net.Conn, error) {
 	}
 
 	if pipe == nil {
-		fmt.Println("No active pipe")
+		s.conf.Log.Errf("No active pipe: %s", userID)
 		return nil, fmt.Errorf("no active pipe")
 	}
 
@@ -28,7 +28,7 @@ func (s *Server) srcfn(userID string, info *services.Info) (net.Conn, error) {
 	stream, err := pipe.sess.OpenStream()
 
 	if err != nil {
-		fmt.Println("Failed to open stream:", err)
+		s.conf.Log.Errf("Failed to open stream: %s", err.Error())
 		return nil, err
 	}
 
@@ -36,7 +36,7 @@ func (s *Server) srcfn(userID string, info *services.Info) (net.Conn, error) {
 	_, err = stream.Write(cmd.New(cmd.CMD_CONNECT, cmd.PackUint16(info.ID)).Pack())
 
 	if err != nil {
-		fmt.Println("Failed to send connect command:", err)
+		s.conf.Log.Errf("Failed to send connect command: %s", err.Error())
 		return nil, err
 	}
 
