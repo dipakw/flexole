@@ -1,6 +1,8 @@
 package server
 
-import "net"
+import (
+	"net"
+)
 
 func (pp *Pipes) add(pipe *Pipe) *Pipe {
 	pp.user.mu.Lock()
@@ -24,6 +26,16 @@ func (pp *Pipes) rem(id string) *Pipe {
 	delete(pp.user.pipesList, id)
 
 	pp.server.conf.Log.Inff("Pipe removed ⭆ user: %s | addr: %s | id: %s", pp.user.id, pipe.conn.RemoteAddr(), pipe.id)
+
+	unpipedServicesIds := pp.user.services.unpipedUnsafe()
+
+	if len(unpipedServicesIds) > 0 {
+		pp.server.conf.Log.Inff("Removing unpiped services ⭆ user: %s | ids: %v", pp.user.id, unpipedServicesIds)
+
+		for _, id := range unpipedServicesIds {
+			pp.user.services.remUnsafe(id)
+		}
+	}
 
 	return pipe
 }

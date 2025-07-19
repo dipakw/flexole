@@ -42,10 +42,15 @@ func (ss *Services) add(service *Service) (*Service, uint8) {
 }
 
 func (ss *Services) rem(id uint16) (*Service, uint8) {
+	ss.user.mu.RLock()
+	defer ss.user.mu.RUnlock()
+
+	return ss.remUnsafe(id)
+}
+
+func (ss *Services) remUnsafe(id uint16) (*Service, uint8) {
 	ss.server.conf.Log.Inff("Removing service ⭆ user: %s | id: %d", ss.user.id, id)
 
-	ss.user.mu.Lock()
-	defer ss.user.mu.Unlock()
 	service, ok := ss.user.servicesList[id]
 
 	if !ok || service == nil {
@@ -85,4 +90,26 @@ func (ss *Services) purge() error {
 	}
 
 	return nil
+}
+
+// Get the ids of services that have no pipes.
+func (ss *Services) unpipedUnsafe() []uint16 {
+	ids := []uint16{}
+
+	for _, s := range ss.user.servicesList {
+		isUnpiped := true
+
+		for _, p := range s.Pipes {
+			if pipe, ok := ss.user.pipesList[p]; ok && pipe != nil {
+				isUnpiped = false
+				break
+			}
+		}
+
+		if isUnpiped {
+			ids = append(ids, s.ID)
+		}
+	}
+
+	return ids
 }

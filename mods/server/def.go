@@ -53,7 +53,6 @@ type Services struct {
 type Pipes struct {
 	user   *User
 	server *Server
-	muon   bool
 }
 
 type Pipe struct {
