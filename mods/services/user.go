@@ -50,7 +50,7 @@ func (u *User) Available(network string, port uint16) bool {
 	return false
 }
 
-func (u *User) Stop(network string, port uint16) error {
+func (u *User) Stop(network string, port uint16) (uint16, error) {
 	u.mu.Lock()
 	u.mgr.mu.Lock()
 	defer u.mu.Unlock()
@@ -69,10 +69,10 @@ func (u *User) Stop(network string, port uint16) error {
 	}
 
 	if !ok || service == nil {
-		return nil
+		return 0, fmt.Errorf("service not found")
 	}
 
-	return service.stop()
+	return service.ID, service.stop()
 }
 
 func (u *User) Reset() []error {
