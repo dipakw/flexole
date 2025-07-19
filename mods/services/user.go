@@ -76,6 +76,11 @@ func (u *User) Stop(network string, port uint16) error {
 }
 
 func (u *User) Reset() []error {
+	u.mu.Lock()
+	u.mgr.mu.Lock()
+	defer u.mu.Unlock()
+	defer u.mgr.mu.Unlock()
+
 	errs := []error{}
 
 	types := []map[uint16]*Service{
@@ -90,7 +95,7 @@ func (u *User) Reset() []error {
 				continue
 			}
 
-			if err := service.Stop(); err != nil {
+			if err := service.stop(); err != nil {
 				errs = append(errs, err)
 			}
 		}

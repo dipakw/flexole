@@ -15,7 +15,10 @@ func (s *Service) Info() *Info {
 
 func (s *Service) Stop() error {
 	s.user.mu.Lock()
+	s.user.mgr.mu.Lock()
 	defer s.user.mu.Unlock()
+	defer s.user.mgr.mu.Unlock()
+
 	return s.stop()
 }
 
