@@ -6,9 +6,10 @@ import (
 	"os"
 	"path"
 	"strings"
+	"time"
 )
 
-func (u *User) startTCPOrUnix(service *Service, background bool) error {
+func (u *User) startTCPOrUnix(service *Service) error {
 	addr := net.JoinHostPort(service.Host, fmt.Sprintf("%d", service.Port))
 
 	if service.Type == "unix" {
@@ -35,6 +36,8 @@ func (u *User) startTCPOrUnix(service *Service, background bool) error {
 		return err
 	}
 
+	service.wg.Add(1)
+
 	if service.Type == "tcp" {
 		u.mu.Lock()
 		u.mgr.mu.Lock()
@@ -54,7 +57,9 @@ func (u *User) startTCPOrUnix(service *Service, background bool) error {
 
 	info := service.Info()
 
-	run := func() {
+	go func() {
+		defer service.wg.Done()
+		defer time.Sleep(50 * time.Millisecond)
 		defer service.listener.Close()
 
 		for {
@@ -82,13 +87,7 @@ func (u *User) startTCPOrUnix(service *Service, background bool) error {
 				go relay(service.ctx, conn, src)
 			}
 		}
-	}
-
-	if background {
-		go run()
-	} else {
-		run()
-	}
+	}()
 
 	return nil
 }

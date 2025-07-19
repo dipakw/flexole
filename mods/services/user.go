@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-func (u *User) Start(background bool, service *Service) (*Service, error) {
+func (u *User) Start(service *Service) (*Service, error) {
 	service.user = u
 
 	if !u.Available(service.Type, service.Port) {
@@ -15,11 +15,11 @@ func (u *User) Start(background bool, service *Service) (*Service, error) {
 	service.ctx, service.cancel = context.WithCancel(context.Background())
 
 	if service.Type == "tcp" || service.Type == "unix" {
-		return service, u.startTCPOrUnix(service, background)
+		return service, u.startTCPOrUnix(service)
 	}
 
 	if service.Type == "udp" {
-		return service, u.startUDP(service, background)
+		return service, u.startUDP(service)
 	}
 
 	return nil, fmt.Errorf("invalid service type: %s", service.Type)

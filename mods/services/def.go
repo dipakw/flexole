@@ -33,6 +33,7 @@ type Service struct {
 	user     *User
 	ctx      context.Context
 	cancel   context.CancelFunc
+	wg       sync.WaitGroup
 }
 
 type Config struct {

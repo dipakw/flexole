@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func (u *User) startUDP(service *Service, background bool) error {
+func (u *User) startUDP(service *Service) error {
 	var err error
 
 	service.udpConn, err = net.ListenUDP("udp", &net.UDPAddr{
@@ -17,6 +17,8 @@ func (u *User) startUDP(service *Service, background bool) error {
 	if err != nil {
 		return err
 	}
+
+	service.wg.Add(1)
 
 	// Add service to the user's list.
 	u.mu.Lock()
@@ -30,7 +32,11 @@ func (u *User) startUDP(service *Service, background bool) error {
 
 	info := service.Info()
 
-	run := func() {
+	go func() {
+		defer service.wg.Done()
+		defer time.Sleep(50 * time.Millisecond)
+		defer service.udpConn.Close()
+
 		for {
 			buffer := make([]byte, MAX_UDP_PACKET_SIZE)
 			n, addr, err := service.udpConn.ReadFromUDP(buffer)
@@ -68,13 +74,7 @@ func (u *User) startUDP(service *Service, background bool) error {
 				}
 			}()
 		}
-	}
-
-	if background {
-		go run()
-	} else {
-		run()
-	}
+	}()
 
 	return nil
 }
