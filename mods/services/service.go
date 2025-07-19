@@ -29,6 +29,8 @@ func (s *Service) stop() error {
 	s.cancel()
 
 	if s.Type == "unix" {
+		s.listener.Close()
+
 		if s.sock != "" {
 			return os.Remove(s.sock)
 		}
@@ -37,6 +39,8 @@ func (s *Service) stop() error {
 	}
 
 	if s.Type == "tcp" {
+		s.listener.Close()
+
 		// Remove from user's list.
 		delete(s.user.tcp, s.Port)
 
@@ -45,6 +49,8 @@ func (s *Service) stop() error {
 	}
 
 	if s.Type == "udp" {
+		s.udpConn.Close()
+
 		// Remove from user's list.
 		delete(s.user.udp, s.Port)
 

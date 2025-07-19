@@ -59,7 +59,7 @@ func (u *User) startTCPOrUnix(service *Service) error {
 
 	go func() {
 		defer service.wg.Done()
-		defer time.Sleep(50 * time.Millisecond)
+		defer time.Sleep(10 * time.Millisecond)
 		defer service.listener.Close()
 
 		for {
