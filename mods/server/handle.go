@@ -75,14 +75,7 @@ func (s *Server) handle(ctx context.Context, conn net.Conn) {
 
 	// Listen for control commands.
 	go s.listenCtrl(ctx, pipe)
-
-	defer func() {
-		// Remove pipe.
-		s.User(auth.UserID).pipes.rem(auth.PipeID)
-
-		// Log.
-		s.conf.Log.Inff("Pipe removed: (%s) | user: %s | pipe: %s", conn.RemoteAddr(), auth.UserID, auth.PipeID)
-	}()
+	defer s.User(auth.UserID).pipes.rem(auth.PipeID)
 
 	// To detect broken pipes.
 	for {
