@@ -33,6 +33,8 @@ func (s *Server) listenCtrl(pipe *Pipe) {
 			status = s.cmdExpose(pipe.userID, command.Data)
 		case cmd.CMD_DISPOSE:
 			status = s.cmdDispose(pipe.userID, command.Data)
+		case cmd.CMD_SHUTDOWN:
+			status = s.cmdShutdown(pipe.userID)
 		default:
 			status = cmd.CMD_INVALID_CMD
 		}
@@ -90,6 +92,32 @@ func (s *Server) cmdDispose(userID string, data []byte) uint8 {
 	if err := user.Stop(netPort.Net, netPort.Port); err != nil {
 		return cmd.CMD_OP_FAILED
 	}
+
+	return cmd.CMD_STATUS_OK
+}
+
+func (s *Server) cmdShutdown(userID string) uint8 {
+	// Stop all services.
+	s.conf.Manager.User(userID).Reset()
+
+	// Close all pipes.
+	user := s.User(userID)
+	user.mu.Lock()
+	defer user.mu.Unlock()
+
+	for _, pipe := range user.pipes {
+		if pipe.ctrl != nil {
+			pipe.ctrl.Close()
+		}
+
+		pipe.sess.Close()
+		pipe.conn.Close()
+	}
+
+	// Remove user from the list.
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	delete(s.users, userID)
 
 	return cmd.CMD_STATUS_OK
 }

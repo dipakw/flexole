@@ -73,3 +73,17 @@ func (c *Client) Dispose(id uint16) error {
 
 	return nil
 }
+
+func (c *Client) Shutdown() error {
+	if err := c.sendCtrlCommand(true, cmd.CMD_SHUTDOWN, nil); err != nil {
+		return err
+	}
+
+	c.cancel()
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	c.services = map[uint16]*Service{}
+
+	return nil
+}

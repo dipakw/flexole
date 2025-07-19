@@ -69,6 +69,7 @@ func (s *Server) handle(conn net.Conn) {
 		userID: auth.UserID,
 		id:     auth.PipeID,
 		active: true,
+		conn:   conn,
 		sess:   sess,
 		ctrl:   ctrl,
 	})

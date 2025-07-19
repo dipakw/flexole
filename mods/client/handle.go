@@ -34,23 +34,27 @@ func (c *Client) setupCtrlChan(sess *smux.Session) (*smux.Stream, error) {
 func (c *Client) listen(pipeId string) {
 	pipe := c.pipes[pipeId]
 
+	defer c.wg.Done()
 	defer c.Pipes.Rem(pipeId)
 
 	for {
-		stream, err := pipe.sess.AcceptStream()
+		select {
+		case <-c.ctx.Done():
+			return
+		default:
+			stream, err := pipe.sess.AcceptStream()
 
-		if err != nil {
-			fmt.Println("ERR:", err)
-			break
+			if err != nil {
+				fmt.Println("ERR:", err)
+				break
+			}
+
+			go c.handle(stream)
 		}
-
-		go c.handle(pipeId, stream)
 	}
-
-	c.wg.Done()
 }
 
-func (c *Client) handle(pipeId string, stream *smux.Stream) {
+func (c *Client) handle(stream *smux.Stream) {
 	defer stream.Close()
 
 	buf := make([]byte, 8)
