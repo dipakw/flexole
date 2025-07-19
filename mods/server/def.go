@@ -71,8 +71,3 @@ type Service struct {
 	Port  uint16   `json:"port"`
 	Pipes []string `json:"pipes"`
 }
-
-type NetPort struct {
-	Net  string
-	Port uint16
-}
