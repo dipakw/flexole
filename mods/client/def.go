@@ -9,22 +9,22 @@ import (
 )
 
 type Config struct {
-	Server *Addr
-	Pipes  []string
-
+	Server  *Addr
 	EncAlgo uint8
 	EncKey  []byte
 }
 
 type Client struct {
-	conf     *Config
-	mu       sync.RWMutex
-	wg       sync.WaitGroup
+	conf         *Config
+	mu           sync.RWMutex
+	wg           sync.WaitGroup
+	ctx          context.Context
+	cancel       context.CancelFunc
+	pipesList    map[string]*connPipe
+	servicesList map[uint16]*Service
+
 	Pipes    *Pipes
-	pipes    map[string]*aPipe
-	services map[uint16]*Service
-	ctx      context.Context
-	cancel   context.CancelFunc
+	Services *Services
 }
 
 type Addr struct {
@@ -38,6 +38,10 @@ type Pipe struct {
 }
 
 type Pipes struct {
+	c *Client
+}
+
+type Services struct {
 	c *Client
 }
 
@@ -58,12 +62,7 @@ type Service struct {
 	Remote *Remote
 }
 
-type NetPort struct {
-	Net  string
-	Port uint16
-}
-
-type aPipe struct {
+type connPipe struct {
 	id     string
 	active bool
 	conn   net.Conn

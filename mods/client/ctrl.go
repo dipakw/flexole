@@ -12,7 +12,7 @@ func (c *Client) sendCtrlCommand(safe bool, id uint8, payload []byte) error {
 		defer c.mu.Unlock()
 	}
 
-	if len(c.pipes) == 0 {
+	if len(c.pipesList) == 0 {
 		return errors.New("no pipes available")
 	}
 
@@ -21,7 +21,7 @@ func (c *Client) sendCtrlCommand(safe bool, id uint8, payload []byte) error {
 	var n int
 	var err error
 
-	for _, pipe := range c.pipes {
+	for _, pipe := range c.pipesList {
 		if pipe == nil {
 			err = errors.New("pipe is nil")
 			continue
@@ -31,9 +31,9 @@ func (c *Client) sendCtrlCommand(safe bool, id uint8, payload []byte) error {
 
 		// Command sent successfully.
 		if err == nil && n == len(command) {
-			// Wait for response.
 			buf := make([]byte, 8)
 
+			// Wait for response.
 			n, err = pipe.ctrl.Read(buf)
 
 			if err == nil {

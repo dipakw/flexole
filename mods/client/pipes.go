@@ -7,10 +7,16 @@ import (
 	"github.com/xtaci/smux"
 )
 
-func (p *Pipes) Add(id string, encrypt bool) error {
-	conn, err := net.Dial(p.c.conf.Server.Net, p.c.conf.Server.Addr)
+func (pp *Pipes) Add(id string, encrypt bool) error {
+	conn, err := net.Dial(pp.c.conf.Server.Net, pp.c.conf.Server.Addr)
 
 	if err != nil {
+		return err
+	}
+
+	// Send the PIPE ID to the server.
+	if _, err := conn.Write([]byte(id)); err != nil {
+		conn.Close()
 		return err
 	}
 
@@ -18,8 +24,8 @@ func (p *Pipes) Add(id string, encrypt bool) error {
 
 	if encrypt {
 		useConn, err = uconn.New(conn, &uconn.Opts{
-			Algo: p.c.conf.EncAlgo,
-			Key:  p.c.conf.EncKey,
+			Algo: pp.c.conf.EncAlgo,
+			Key:  pp.c.conf.EncKey,
 		})
 
 		if err != nil {
@@ -30,16 +36,16 @@ func (p *Pipes) Add(id string, encrypt bool) error {
 	sess, err := smux.Client(useConn, smux.DefaultConfig())
 
 	// Set up control channel.
-	ctrl, err := p.c.setupCtrlChan(sess)
+	ctrl, err := pp.c.setupCtrlChan(sess)
 
 	if err != nil {
 		return err
 	}
 
-	p.c.mu.Lock()
-	defer p.c.mu.Unlock()
+	pp.c.mu.Lock()
+	defer pp.c.mu.Unlock()
 
-	p.c.pipes[id] = &aPipe{
+	pp.c.pipesList[id] = &connPipe{
 		id:     id,
 		active: true,
 		conn:   useConn,
@@ -47,22 +53,20 @@ func (p *Pipes) Add(id string, encrypt bool) error {
 		ctrl:   ctrl,
 	}
 
-	p.c.wg.Add(1)
+	pp.c.wg.Add(1)
 
-	go p.c.listen(id)
+	go pp.c.listen(id)
 
 	return nil
 }
 
-func (p *Pipes) Rem(id string) error {
-	p.c.mu.Lock()
-	defer p.c.mu.Unlock()
+func (pp *Pipes) Rem(id string) error {
+	pp.c.mu.Lock()
+	defer pp.c.mu.Unlock()
 
-	if pipe, ok := p.c.pipes[id]; ok {
-		pipe.sess.Close()
+	if pipe, ok := pp.c.pipesList[id]; ok {
 		pipe.conn.Close()
-
-		delete(p.c.pipes, id)
+		delete(pp.c.pipesList, id)
 	}
 
 	return nil

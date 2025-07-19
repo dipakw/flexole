@@ -4,6 +4,7 @@ import (
 	"errors"
 	"flexole/mods/cmd"
 	"fmt"
+	"io"
 	"net"
 
 	"github.com/xtaci/smux"
@@ -32,7 +33,7 @@ func (c *Client) setupCtrlChan(sess *smux.Session) (*smux.Stream, error) {
 }
 
 func (c *Client) listen(pipeId string) {
-	pipe := c.pipes[pipeId]
+	pipe := c.pipesList[pipeId]
 
 	defer c.wg.Done()
 	defer c.Pipes.Rem(pipeId)
@@ -45,8 +46,8 @@ func (c *Client) listen(pipeId string) {
 			stream, err := pipe.sess.AcceptStream()
 
 			if err != nil {
-				fmt.Println("ERR:", err)
-				break
+				fmt.Println("ERR:", err, err == io.EOF)
+				return
 			}
 
 			go c.handle(stream)
@@ -79,7 +80,7 @@ func (c *Client) handle(stream *smux.Stream) {
 
 	serviceID := cmd.UnpackUint16(command.Data)
 
-	service, ok := c.services[serviceID]
+	service, ok := c.servicesList[serviceID]
 
 	if !ok {
 		fmt.Println("Service not found:", serviceID)
