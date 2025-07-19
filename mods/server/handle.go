@@ -3,8 +3,10 @@ package server
 import (
 	"context"
 	"flexole/mods/cmd"
+	"fmt"
 	"net"
 
+	"github.com/dipakw/uconn"
 	"github.com/xtaci/smux"
 )
 
@@ -22,7 +24,7 @@ func (s *Server) handle(ctx context.Context, conn net.Conn) {
 	// Set up encryption if needed.
 	useConn := conn
 
-	/*if auth.Encrypt {
+	if auth.Encrypt {
 		algo, key, err := s.conf.EncFN(auth, conn)
 
 		if err != nil {
@@ -39,7 +41,7 @@ func (s *Server) handle(ctx context.Context, conn net.Conn) {
 			fmt.Println("Failed to create enc conn:", err)
 			return
 		}
-	}*/
+	}
 
 	// Init mux.
 	sess, err := smux.Server(useConn, smux.DefaultConfig())
