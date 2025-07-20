@@ -48,6 +48,10 @@ func (ss *Services) rem(id uint16) (*Service, uint8) {
 	return ss.remUnsafe(id)
 }
 
+func (ss *Services) getUnsafe(id uint16) *Service {
+	return ss.user.servicesList[id]
+}
+
 func (ss *Services) remUnsafe(id uint16) (*Service, uint8) {
 	ss.server.conf.Log.Inff("Removing service ⭆ user: %s | id: %d", ss.user.id, id)
 

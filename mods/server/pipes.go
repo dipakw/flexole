@@ -59,3 +59,15 @@ func (pp *Pipes) purge() error {
 
 	return nil
 }
+
+func (pp *Pipes) hasUnsafe(id string) bool {
+	if pipe, ok := pp.user.pipesList[id]; ok && pipe != nil {
+		return true
+	}
+
+	return false
+}
+
+func (pp *Pipes) getUnsafe(id string) *Pipe {
+	return pp.user.pipesList[id]
+}
