@@ -13,10 +13,8 @@ func (s *Server) srcfn(userID string, info *services.Info) (net.Conn, error) {
 	var pipe *Pipe
 
 	for _, p := range user.pipesList {
-		if p.active {
-			pipe = p
-			break
-		}
+		pipe = p
+		break
 	}
 
 	if pipe == nil {

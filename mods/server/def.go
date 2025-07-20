@@ -56,7 +56,6 @@ type Pipes struct {
 type Pipe struct {
 	userID string
 	id     string
-	active bool
 	conn   net.Conn
 	sess   *smux.Session
 	ctrl   *smux.Stream
