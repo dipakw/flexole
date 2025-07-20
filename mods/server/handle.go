@@ -45,7 +45,7 @@ func (s *Server) handle(ctx context.Context, conn net.Conn) {
 	})
 
 	if !auth.Ok() {
-		s.conf.Log.Errf("Authentication failed:: addr: %s | reason: %s | error: %s", conn.RemoteAddr(), auth.Err().Reason(), auth.Err().Main())
+		s.conf.Log.Errf("Authentication failed ⭆ addr: %s | reason: %s | error: %s", conn.RemoteAddr(), auth.Err().Reason(), auth.Err().Main())
 		return
 	}
 
@@ -65,7 +65,7 @@ func (s *Server) handle(ctx context.Context, conn net.Conn) {
 		})
 
 		if err != nil {
-			s.conf.Log.Errf("Failed to set up encryption:: user: %s | addr: %s | error: %s", userId, conn.RemoteAddr(), err.Error())
+			s.conf.Log.Errf("Failed to set up encryption ⭆ user: %s | addr: %s | error: %s", userId, conn.RemoteAddr(), err.Error())
 			return
 		}
 	}
@@ -74,7 +74,7 @@ func (s *Server) handle(ctx context.Context, conn net.Conn) {
 	sess, err := smux.Server(useConn, smux.DefaultConfig())
 
 	if err != nil {
-		s.conf.Log.Errf("Failed to create mux session:: addr: %s | error: %s", conn.RemoteAddr(), err.Error())
+		s.conf.Log.Errf("Failed to create mux session ⭆ addr: %s | error: %s", conn.RemoteAddr(), err.Error())
 		return
 	}
 
@@ -82,13 +82,13 @@ func (s *Server) handle(ctx context.Context, conn net.Conn) {
 	ctrl, err := sess.OpenStream()
 
 	if err != nil {
-		s.conf.Log.Errf("Failed to open control stream:: addr: %s | error: %s", conn.RemoteAddr(), err.Error())
+		s.conf.Log.Errf("Failed to open control stream ⭆ addr: %s | error: %s", conn.RemoteAddr(), err.Error())
 		return
 	}
 
 	// Send control command.
 	if _, err := ctrl.Write(cmd.New(cmd.CMD_OPEN_CTRL_CHAN, nil).Pack()); err != nil {
-		s.conf.Log.Errf("Failed to send control chan command:: addr: %s | error: %s", conn.RemoteAddr(), err.Error())
+		s.conf.Log.Errf("Failed to send control chan command ⭆ addr: %s | error: %s", conn.RemoteAddr(), err.Error())
 		return
 	}
 

@@ -21,12 +21,12 @@ func (s *Server) srcfn(userID string, info *services.Info) (net.Conn, error) {
 	service := user.services.getUnsafe(info.ID)
 
 	if service == nil {
-		s.conf.Log.Errf("Service not found:: user: %s | id: %d", userID, info.ID)
+		s.conf.Log.Errf("Service not found ⭆ user: %s | id: %d", userID, info.ID)
 		return nil, fmt.Errorf("service not found")
 	}
 
 	if len(service.Pipes) == 0 {
-		s.conf.Log.Wrnf("Service has no pipes set:: user: %s | id: %d", userID, info.ID)
+		s.conf.Log.Wrnf("Service has no pipes set ⭆ user: %s | id: %d", userID, info.ID)
 		return nil, fmt.Errorf("no pipes set")
 	}
 
@@ -40,7 +40,7 @@ func (s *Server) srcfn(userID string, info *services.Info) (net.Conn, error) {
 	}
 
 	if len(pipesIds) == 0 {
-		s.conf.Log.Wrnf("Service has no active pipes:: user: %s | id: %d", userID, info.ID)
+		s.conf.Log.Wrnf("Service has no active pipes ⭆ user: %s | id: %d", userID, info.ID)
 		return nil, fmt.Errorf("no active pipes")
 	}
 
@@ -70,17 +70,17 @@ func (s *Server) srcfn(userID string, info *services.Info) (net.Conn, error) {
 	stream, err := pipe.sess.OpenStream()
 
 	if err != nil {
-		s.conf.Log.Errf("Failed to open stream:: user: %s | id: %d | index: %d | error: %s", userID, info.ID, index, err.Error())
+		s.conf.Log.Errf("Failed to open stream ⭆ user: %s | id: %d | index: %d | error: %s", userID, info.ID, index, err.Error())
 		return nil, err
 	}
 
 	// Send connect command.
 	if _, err := stream.Write(cmd.New(cmd.CMD_CONNECT, cmd.PackUint16(info.ID)).Pack()); err != nil {
-		s.conf.Log.Errf("Failed to send connect command:: user: %s | service: %d | pipe: %s | error: %s", userID, info.ID, pipe.id, err.Error())
+		s.conf.Log.Errf("Failed to send connect command ⭆ user: %s | service: %d | pipe: %s | error: %s", userID, info.ID, pipe.id, err.Error())
 		return nil, err
 	}
 
-	s.conf.Log.Inff("Requested service:: user: %s | service: %d | pipe: %s", userID, info.ID, pipe.id)
+	s.conf.Log.Inff("Requested service ⭆ user: %s | service: %d | pipe: %s", userID, info.ID, pipe.id)
 
 	return stream, nil
 }
