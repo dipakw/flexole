@@ -26,7 +26,7 @@ func (s *Server) srcfn(userID string, info *services.Info) (net.Conn, error) {
 	}
 
 	if len(service.Pipes) == 0 {
-		s.conf.Log.Errf("Service has no pipes set:: user: %s | id: %d", userID, info.ID)
+		s.conf.Log.Wrnf("Service has no pipes set:: user: %s | id: %d", userID, info.ID)
 		return nil, fmt.Errorf("no pipes set")
 	}
 
@@ -40,7 +40,7 @@ func (s *Server) srcfn(userID string, info *services.Info) (net.Conn, error) {
 	}
 
 	if len(pipesIds) == 0 {
-		s.conf.Log.Errf("Service has no active pipes:: user: %s | id: %d", userID, info.ID)
+		s.conf.Log.Wrnf("Service has no active pipes:: user: %s | id: %d", userID, info.ID)
 		return nil, fmt.Errorf("no active pipes")
 	}
 
