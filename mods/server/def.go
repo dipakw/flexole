@@ -15,9 +15,7 @@ type Config struct {
 	Addr    string
 	Manager *services.ServicesManager
 	Log     logs.Log
-
-	EncFN  func(a *Auth, c net.Conn) (uint8, []byte, error)
-	AuthFN func(c net.Conn) (*Auth, error)
+	KeyFN   func(id []byte) ([]byte, error)
 }
 
 type Auth struct {

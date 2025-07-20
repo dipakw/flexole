@@ -8,14 +8,6 @@ import (
 )
 
 func New(c *Config) (*Server, error) {
-	if c.AuthFN == nil {
-		return nil, fmt.Errorf("option 'AuthFN' is required")
-	}
-
-	if c.EncFN == nil {
-		return nil, fmt.Errorf("option 'EncFN' is required")
-	}
-
 	instance := &Server{
 		conf:  c,
 		mu:    sync.RWMutex{},

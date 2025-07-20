@@ -1,7 +1,10 @@
 package client
 
 import (
+	"crypto/sha256"
+	"flexole/mods/auth"
 	"net"
+	"time"
 
 	"github.com/dipakw/uconn"
 	"github.com/xtaci/smux"
@@ -14,18 +17,41 @@ func (pp *Pipes) Add(id string, encrypt bool) error {
 		return err
 	}
 
-	// Send the PIPE ID to the server.
-	if _, err := conn.Write([]byte(id)); err != nil {
-		conn.Close()
-		return err
+	// Authenticate.
+	auth := auth.Client(conn, &auth.ClientOpts{
+		ID:      pp.c.conf.ID,
+		Timeout: 10 * time.Second,
+
+		Meta: map[string]string{
+			"pipe": id,
+			"enc":  map[bool]string{true: "1", false: "0"}[encrypt],
+		},
+
+		SignMsg: func(msg []byte) ([]byte, error) {
+			data := make([]byte, len(pp.c.conf.ID)+len(msg)+len(pp.c.conf.Key))
+			copy(data, pp.c.conf.ID)
+			copy(data[len(pp.c.conf.ID):], msg)
+			copy(data[len(pp.c.conf.ID)+len(msg):], pp.c.conf.Key)
+
+			// Generate sha256 hash.
+			hash := sha256.New()
+			hash.Write(data)
+
+			// Return the signature.
+			return hash.Sum(nil), nil
+		},
+	})
+
+	if !auth.Ok() {
+		return auth.Err().Main()
 	}
 
 	useConn := conn
 
 	if encrypt {
 		useConn, err = uconn.New(conn, &uconn.Opts{
-			Algo: pp.c.conf.EncAlgo,
-			Key:  pp.c.conf.EncKey,
+			Algo: uconn.ALGO_AES256_GCM,
+			Key:  auth.Key,
 		})
 
 		if err != nil {

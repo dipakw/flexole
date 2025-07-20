@@ -2,9 +2,12 @@ package server
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"flexole/mods/auth"
 	"flexole/mods/cmd"
-	"fmt"
 	"net"
+	"time"
 
 	"github.com/dipakw/uconn"
 	"github.com/xtaci/smux"
@@ -14,31 +17,55 @@ func (s *Server) handle(ctx context.Context, conn net.Conn) {
 	defer conn.Close()
 
 	// Authenticate.
-	auth, err := s.conf.AuthFN(conn)
+	auth := auth.Server(conn, &auth.ServerOpts{
+		Timeout:    10 * time.Second,
+		MaxSigSize: 60,
+		MinSigSize: 60,
 
-	if err != nil {
-		s.conf.Log.Errf("Authentication failed: (%s) : %s", conn.RemoteAddr(), err.Error())
+		VerifySig: func(a *auth.Auth, msg []byte, sig []byte) (bool, error) {
+			key, err := s.conf.KeyFN(a.ID)
+
+			if err != nil {
+				return false, err
+			}
+
+			// Generate sha256 hash.
+			data := make([]byte, len(a.ID)+len(msg)+len(key))
+			copy(data, a.ID)
+			copy(data[len(a.ID):], msg)
+			copy(data[len(a.ID)+len(msg):], key)
+
+			// Generate sha256 hash.
+			hash := sha256.New()
+			hash.Write(data)
+
+			// Compare with the signature.
+			return hmac.Equal(hash.Sum(nil), sig), nil
+		},
+	})
+
+	if !auth.Ok() {
+		s.conf.Log.Errf("Authentication failed: (%s) : %s : %s", conn.RemoteAddr(), auth.Err().Reason(), auth.Err().Main())
 		return
 	}
+
+	userId := string(auth.ID)
+	pipeId := auth.Meta["pipe"]
+	encrypt := auth.Meta["enc"] == "1"
+
+	var err error
 
 	// Set up encryption if needed.
 	useConn := conn
 
-	if auth.Encrypt {
-		algo, key, err := s.conf.EncFN(auth, conn)
-
-		if err != nil {
-			fmt.Println("Failed to get enc info:", err)
-			return
-		}
-
+	if encrypt {
 		useConn, err = uconn.New(conn, &uconn.Opts{
-			Algo: algo,
-			Key:  key,
+			Algo: uconn.ALGO_AES256_GCM,
+			Key:  auth.Key,
 		})
 
 		if err != nil {
-			fmt.Println("Failed to create enc conn:", err)
+			s.conf.Log.Errf("Failed to set up encryption:: user: %s | addr: %s | error: %s", userId, conn.RemoteAddr(), err.Error())
 			return
 		}
 	}
@@ -66,9 +93,9 @@ func (s *Server) handle(ctx context.Context, conn net.Conn) {
 	}
 
 	// Add pipe.
-	pipe := s.User(auth.UserID).pipes.add(&Pipe{
-		userID: auth.UserID,
-		id:     auth.PipeID,
+	pipe := s.User(userId).pipes.add(&Pipe{
+		userID: userId,
+		id:     pipeId,
 		active: true,
 		conn:   conn,
 		sess:   sess,
@@ -77,7 +104,7 @@ func (s *Server) handle(ctx context.Context, conn net.Conn) {
 
 	// Listen for control commands.
 	go s.listenCtrl(ctx, pipe)
-	defer s.User(auth.UserID).pipes.rem(auth.PipeID)
+	defer s.User(userId).pipes.rem(pipeId)
 
 	// To detect broken pipes.
 	for {

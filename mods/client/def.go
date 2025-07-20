@@ -9,9 +9,9 @@ import (
 )
 
 type Config struct {
-	Server  *Addr
-	EncAlgo uint8
-	EncKey  []byte
+	ID     []byte
+	Key    []byte
+	Server *Addr
 }
 
 type Client struct {
