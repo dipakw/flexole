@@ -7,7 +7,7 @@ import (
 )
 
 func (ss *Services) add(service *Service) (*Service, uint8) {
-	ss.server.conf.Log.Inff("Adding service ⭆ user: %s | net: %s | port: %d | id: %d", ss.user.id, service.Net, service.Port, service.ID)
+	ss.server.conf.Log.Inff("Adding service => user: %s | net: %s | port: %d | id: %d", ss.user.id, service.Net, service.Port, service.ID)
 
 	ss.user.mu.Lock()
 	defer ss.user.mu.Unlock()
@@ -32,11 +32,11 @@ func (ss *Services) add(service *Service) (*Service, uint8) {
 	})
 
 	if err != nil {
-		ss.server.conf.Log.Errf("Failed to start service ⭆ user: %s | net: %s | port: %d | id: %d | error: %s", ss.user.id, service.Net, service.Port, service.ID, err.Error())
+		ss.server.conf.Log.Errf("Failed to start service => user: %s | net: %s | port: %d | id: %d | error: %s", ss.user.id, service.Net, service.Port, service.ID, err.Error())
 		return nil, cmd.CMD_OP_FAILED
 	}
 
-	ss.server.conf.Log.Inff("Service added ⭆ user: %s | net: %s | port: %d | id: %d", ss.user.id, service.Net, service.Port, service.ID)
+	ss.server.conf.Log.Inff("Service added => user: %s | net: %s | port: %d | id: %d", ss.user.id, service.Net, service.Port, service.ID)
 
 	return service, cmd.CMD_STATUS_OK
 }
@@ -53,7 +53,7 @@ func (ss *Services) getUnsafe(id uint16) *Service {
 }
 
 func (ss *Services) remUnsafe(id uint16) (*Service, uint8) {
-	ss.server.conf.Log.Inff("Removing service ⭆ user: %s | id: %d", ss.user.id, id)
+	ss.server.conf.Log.Inff("Removing service => user: %s | id: %d", ss.user.id, id)
 
 	service, ok := ss.user.servicesList[id]
 
@@ -63,20 +63,20 @@ func (ss *Services) remUnsafe(id uint16) (*Service, uint8) {
 
 	// Stop service.
 	if _, err := ss.server.conf.Manager.User(ss.user.id).Stop(service.Net, service.Port); err != nil {
-		ss.server.conf.Log.Errf("Failed to stop service ⭆ user: %s | net: %s | port: %d | id: %d | error: %s", ss.user.id, service.Net, service.Port, id, err.Error())
+		ss.server.conf.Log.Errf("Failed to stop service => user: %s | net: %s | port: %d | id: %d | error: %s", ss.user.id, service.Net, service.Port, id, err.Error())
 		return nil, cmd.CMD_OP_FAILED
 	}
 
 	// Remove service from user services list.
 	delete(ss.user.servicesList, id)
 
-	ss.server.conf.Log.Inff("Service removed ⭆ user: %s | net: %s | port: %d | id: %d", ss.user.id, service.Net, service.Port, id)
+	ss.server.conf.Log.Inff("Service removed => user: %s | net: %s | port: %d | id: %d", ss.user.id, service.Net, service.Port, id)
 
 	return service, cmd.CMD_STATUS_OK
 }
 
 func (ss *Services) purge() error {
-	ss.server.conf.Log.Inff("Purging services ⭆ user: %s", ss.user.id)
+	ss.server.conf.Log.Inff("Purging services => user: %s", ss.user.id)
 
 	ss.user.mu.RLock()
 

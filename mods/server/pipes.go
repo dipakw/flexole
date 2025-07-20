@@ -9,7 +9,7 @@ func (pp *Pipes) add(pipe *Pipe) *Pipe {
 	defer pp.user.mu.Unlock()
 	pp.user.pipesList[pipe.id] = pipe
 
-	pp.server.conf.Log.Inff("Pipe added ⭆ user: %s | addr: %s | id: %s", pp.user.id, pipe.conn.RemoteAddr(), pipe.id)
+	pp.server.conf.Log.Inff("Pipe added => user: %s | addr: %s | id: %s", pp.user.id, pipe.conn.RemoteAddr(), pipe.id)
 
 	return pipe
 }
@@ -25,12 +25,12 @@ func (pp *Pipes) rem(id string) *Pipe {
 
 	delete(pp.user.pipesList, id)
 
-	pp.server.conf.Log.Inff("Pipe removed ⭆ user: %s | addr: %s | id: %s", pp.user.id, pipe.conn.RemoteAddr(), pipe.id)
+	pp.server.conf.Log.Inff("Pipe removed => user: %s | addr: %s | id: %s", pp.user.id, pipe.conn.RemoteAddr(), pipe.id)
 
 	unpipedServicesIds := pp.user.services.unpipedUnsafe()
 
 	if len(unpipedServicesIds) > 0 {
-		pp.server.conf.Log.Inff("Removing unpiped services ⭆ user: %s | ids: %v", pp.user.id, unpipedServicesIds)
+		pp.server.conf.Log.Inff("Removing unpiped services => user: %s | ids: %v", pp.user.id, unpipedServicesIds)
 
 		for _, id := range unpipedServicesIds {
 			pp.user.services.remUnsafe(id)
@@ -41,7 +41,7 @@ func (pp *Pipes) rem(id string) *Pipe {
 }
 
 func (pp *Pipes) purge() error {
-	pp.server.conf.Log.Inff("Purging pipes ⭆ user: %s", pp.user.id)
+	pp.server.conf.Log.Inff("Purging pipes => user: %s", pp.user.id)
 
 	pp.user.mu.RLock()
 
