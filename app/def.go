@@ -1,5 +1,9 @@
 package app
 
+const (
+	DEFAULT_PORT = "8887"
+)
+
 type Addr struct {
 	Net  string `yaml:"net"`
 	Addr string `yaml:"addr"`

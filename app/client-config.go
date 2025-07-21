@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"net"
 	"os"
 	"strconv"
 	"strings"
@@ -138,6 +139,22 @@ func getClientQuickConfig(opts map[string]string) (*ClientConfig, error) {
 		return nil, fmt.Errorf("local udp can only be used with udp remote")
 	}
 
+	// Check if the remote addr has a port
+	serverHost, serverPort, err := net.SplitHostPort(remoteAddr)
+
+	if strings.HasSuffix(remoteAddr, ":") || serverPort == "0" {
+		return nil, fmt.Errorf("invalid remote addr: %s", remoteAddr)
+	}
+
+	if err != nil {
+		serverPort = DEFAULT_PORT
+		err = nil
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("invalid remote addr: %s", remoteAddr)
+	}
+
 	config := &ClientConfig{
 		Version: "1.0.0",
 
@@ -147,7 +164,7 @@ func getClientQuickConfig(opts map[string]string) (*ClientConfig, error) {
 
 			Server: ServerAddr{
 				Net:  "tcp",
-				Addr: remoteAddr,
+				Addr: net.JoinHostPort(serverHost, serverPort),
 			},
 		},
 

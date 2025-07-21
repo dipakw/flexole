@@ -37,7 +37,7 @@ func getServerConfig(opts map[string]string) (*ServerConfig, error) {
 		port, ok := opts["port"]
 
 		if !ok || port == "" {
-			port = "8887"
+			port = DEFAULT_PORT
 			opts["port"] = port
 		}
 
