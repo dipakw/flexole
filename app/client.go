@@ -24,8 +24,8 @@ func startClient(config *ClientConfig) {
 		Key: []byte(config.Auth.Key),
 
 		Server: &client.Addr{
-			Net:  config.Auth.Server.Net,
-			Addr: config.Auth.Server.Addr,
+			Net:  config.Server.Net,
+			Addr: config.Server.Addr,
 		},
 	})
 

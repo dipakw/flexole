@@ -162,11 +162,11 @@ func getClientQuickConfig(opts map[string]string) (*ClientConfig, error) {
 		Auth: Auth{
 			ID:  "quick",
 			Key: opts["quick"],
+		},
 
-			Server: ServerAddr{
-				Net:  "tcp",
-				Addr: net.JoinHostPort(serverHost, serverPort),
-			},
+		Server: Addr{
+			Net:  "tcp",
+			Addr: net.JoinHostPort(serverHost, serverPort),
 		},
 
 		Pipes: []Pipe{

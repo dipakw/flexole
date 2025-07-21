@@ -50,19 +50,14 @@ type MaxServices struct {
 type ClientConfig struct {
 	Version  string    `yaml:"version"`
 	Auth     Auth      `yaml:"auth"`
+	Server   Addr      `yaml:"server"`
 	Pipes    []Pipe    `yaml:"pipes"`
 	Services []Service `yaml:"services"`
 }
 
 type Auth struct {
-	ID     string     `yaml:"id"`
-	Key    string     `yaml:"key"`
-	Server ServerAddr `yaml:"server"`
-}
-
-type ServerAddr struct {
-	Net  string `yaml:"net"`
-	Addr string `yaml:"addr"`
+	ID  string `yaml:"id"`
+	Key string `yaml:"key"`
 }
 
 type Pipe struct {
