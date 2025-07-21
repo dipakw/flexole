@@ -32,7 +32,7 @@ func (s *Service) stop() error {
 		s.listener.Close()
 
 		if s.sock != "" {
-			return os.Remove(s.sock)
+			os.Remove(s.sock)
 		}
 
 		delete(s.user.unix, s.Port)
