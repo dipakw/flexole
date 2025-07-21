@@ -77,7 +77,7 @@ func Server(clientConn net.Conn, args *ServerOpts) *Auth {
 	}
 
 	// Step 6: Receive the ID and meta data.
-	buf, n, err = readonce(clientConn, MAX_ID_AND_META_SIZE, &readopts{
+	buf, n, err = readonce(clientConn, MAX_ID_META_SIZE, &readopts{
 		timeout: args.Timeout,
 	})
 
@@ -117,7 +117,7 @@ func Server(clientConn net.Conn, args *ServerOpts) *Auth {
 	res.Meta = meta
 
 	// Step 7: Send the challenge.
-	challenge := randbytes(CHALLENGE_SIZE_SEND)
+	challenge := randbytes(CHALLENGE_SIZE)
 	encryptedChlng, err := res.Encrypt(challenge)
 
 	if err != nil {
@@ -135,8 +135,6 @@ func Server(clientConn net.Conn, args *ServerOpts) *Auth {
 			err:    err,
 		})
 	}
-
-	challengeRead := challenge[:CHALLENGE_SIZE_READ]
 
 	// Step 8: Get the encrypted signed message size.
 	buf, n, err = readonce(clientConn, 2, &readopts{
@@ -183,7 +181,7 @@ func Server(clientConn net.Conn, args *ServerOpts) *Auth {
 	}
 
 	// Step 9: Verify the signature
-	if ok, err := args.VerifySig(res, challengeRead, dsig); !ok {
+	if ok, err := args.VerifySig(res, challenge, dsig); !ok {
 		if err == nil {
 			err = errors.New("signatures didn't match")
 		}
@@ -195,9 +193,7 @@ func Server(clientConn net.Conn, args *ServerOpts) *Auth {
 	}
 
 	// Step 10: Send the confirmation
-	cnfm := challengeRead[:]
-	cnfm = append(cnfm, randbytes(CHALLENGE_SIZE_SEND-CHALLENGE_SIZE_READ)...)
-	cnfm, err = res.Encrypt(cnfm)
+	cnfm, err := res.Encrypt(challenge)
 
 	if err != nil {
 		return res.re(&Err{

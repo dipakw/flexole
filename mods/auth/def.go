@@ -5,9 +5,8 @@ import (
 )
 
 const (
-	CHALLENGE_SIZE_SEND  = 64
-	CHALLENGE_SIZE_READ  = 40
-	MAX_ID_AND_META_SIZE = 287
+	CHALLENGE_SIZE   = 40
+	MAX_ID_META_SIZE = 287
 )
 
 type Auth struct {

@@ -116,17 +116,15 @@ func Client(serverConn net.Conn, args *ClientOpts) *Auth {
 		})
 	}
 
-	if len(chnm) != CHALLENGE_SIZE_SEND {
+	if len(chnm) != CHALLENGE_SIZE {
 		return res.re(&Err{
 			reason: "challenge message is too short",
-			err:    fmt.Errorf("received %d/%d", len(chnm), CHALLENGE_SIZE_SEND),
+			err:    fmt.Errorf("received %d/%d", len(chnm), CHALLENGE_SIZE),
 		})
 	}
 
-	challenge := chnm[:CHALLENGE_SIZE_READ]
-
 	// Step 6: Sign the challenge
-	sig, err := args.SignMsg(challenge)
+	sig, err := args.SignMsg(chnm)
 
 	if err != nil {
 		return res.re(&Err{
@@ -180,15 +178,15 @@ func Client(serverConn net.Conn, args *ClientOpts) *Auth {
 		})
 	}
 
-	if len(dcnf) != CHALLENGE_SIZE_SEND {
+	if len(dcnf) != CHALLENGE_SIZE {
 		return res.re(&Err{
 			reason: "confirmation message is too short",
-			err:    fmt.Errorf("received %d/%d", len(chnm), CHALLENGE_SIZE_SEND),
+			err:    fmt.Errorf("received %d/%d", len(chnm), CHALLENGE_SIZE),
 		})
 	}
 
 	// Step 9: Verify the confirmation
-	if !bytes.Equal(dcnf[:CHALLENGE_SIZE_READ], challenge) {
+	if !bytes.Equal(dcnf, chnm) {
 		return res.re(&Err{
 			reason: "invalid confirmation",
 			err:    errors.New("challenges do not match"),
