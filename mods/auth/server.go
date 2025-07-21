@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"time"
 )
 
 func Server(clientConn net.Conn, args *ServerOpts) *Auth {
@@ -209,6 +210,10 @@ func Server(clientConn net.Conn, args *ServerOpts) *Auth {
 			reason: "failed to send the confirmation message",
 			err:    err,
 		})
+	}
+
+	if args.DelayOnAuth > 0 {
+		time.Sleep(args.DelayOnAuth)
 	}
 
 	return res

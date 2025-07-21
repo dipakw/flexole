@@ -23,10 +23,11 @@ type Err struct {
 }
 
 type ServerOpts struct {
-	Timeout    time.Duration
-	MaxSigSize uint16
-	MinSigSize uint16
-	VerifySig  func(auth *Auth, msg []byte, sig []byte) (bool, error)
+	Timeout     time.Duration
+	MaxSigSize  uint16
+	MinSigSize  uint16
+	DelayOnAuth time.Duration
+	VerifySig   func(auth *Auth, msg []byte, sig []byte) (bool, error)
 }
 
 type ClientOpts struct {

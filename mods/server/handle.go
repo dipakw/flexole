@@ -18,9 +18,10 @@ func (s *Server) handle(ctx context.Context, conn net.Conn) {
 
 	// Authenticate.
 	auth := auth.Server(conn, &auth.ServerOpts{
-		Timeout:    10 * time.Second,
-		MaxSigSize: 60,
-		MinSigSize: 60,
+		Timeout:     10 * time.Second,
+		MaxSigSize:  60,
+		MinSigSize:  60,
+		DelayOnAuth: 15 * time.Millisecond,
 
 		VerifySig: func(a *auth.Auth, msg []byte, sig []byte) (bool, error) {
 			key, err := s.conf.KeyFN(string(a.ID))
