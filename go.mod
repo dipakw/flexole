@@ -6,6 +6,7 @@ require (
 	github.com/dipakw/logs v1.1.0
 	github.com/dipakw/uconn v1.1.2
 	github.com/xtaci/smux v1.5.34
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
