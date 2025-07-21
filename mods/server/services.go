@@ -96,6 +96,25 @@ func (ss *Services) purge() error {
 	return nil
 }
 
+func (ss *Services) count(kind string) int {
+	ss.user.mu.RLock()
+	defer ss.user.mu.RUnlock()
+
+	if kind == "*" {
+		return len(ss.user.servicesList)
+	}
+
+	count := 0
+
+	for _, s := range ss.user.servicesList {
+		if s.Net == kind {
+			count++
+		}
+	}
+
+	return count
+}
+
 // Get the ids of services that have no pipes.
 func (ss *Services) unpipedUnsafe() []uint16 {
 	ids := []uint16{}

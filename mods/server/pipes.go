@@ -60,6 +60,12 @@ func (pp *Pipes) purge() error {
 	return nil
 }
 
+func (pp *Pipes) count() int {
+	pp.user.mu.RLock()
+	defer pp.user.mu.RUnlock()
+	return len(pp.user.pipesList)
+}
+
 func (pp *Pipes) hasUnsafe(id string) bool {
 	if pipe, ok := pp.user.pipesList[id]; ok && pipe != nil {
 		return true

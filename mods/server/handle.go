@@ -23,7 +23,7 @@ func (s *Server) handle(ctx context.Context, conn net.Conn) {
 		MinSigSize: 60,
 
 		VerifySig: func(a *auth.Auth, msg []byte, sig []byte) (bool, error) {
-			key, err := s.conf.KeyFN(a.ID)
+			key, err := s.conf.KeyFN(string(a.ID))
 
 			if err != nil {
 				return false, err
@@ -50,6 +50,19 @@ func (s *Server) handle(ctx context.Context, conn net.Conn) {
 	}
 
 	userId := string(auth.ID)
+	user := s.User(userId)
+	pipesLimit := s.conf.LimitFN(userId, "pipes")
+
+	if pipesLimit == 0 {
+		s.conf.Log.Inff("Pipes limit is 0 => user: %s | addr: %s", userId, conn.RemoteAddr())
+		return
+	}
+
+	if user.pipes.count() >= pipesLimit {
+		s.conf.Log.Inff("Pipes limit reached => user: %s | addr: %s | limit: %d", userId, conn.RemoteAddr(), pipesLimit)
+		return
+	}
+
 	pipeId := auth.Meta["pipe"]
 	encrypt := auth.Meta["enc"] == "1"
 
@@ -93,7 +106,7 @@ func (s *Server) handle(ctx context.Context, conn net.Conn) {
 	}
 
 	// Add pipe.
-	pipe := s.User(userId).pipes.add(&Pipe{
+	pipe := user.pipes.add(&Pipe{
 		userID: userId,
 		id:     pipeId,
 		conn:   conn,
@@ -103,7 +116,7 @@ func (s *Server) handle(ctx context.Context, conn net.Conn) {
 
 	// Listen for control commands.
 	go s.listenCtrl(ctx, pipe)
-	defer s.User(userId).pipes.rem(pipeId)
+	defer user.pipes.rem(pipeId)
 
 	// To detect broken pipes.
 	for {

@@ -15,7 +15,8 @@ type Config struct {
 	Addr    string
 	Manager *services.ServicesManager
 	Log     logs.Log
-	KeyFN   func(id []byte) ([]byte, error)
+	KeyFN   func(id string) ([]byte, error)
+	LimitFN func(id string, kind string) int
 }
 
 type Auth struct {

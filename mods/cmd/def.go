@@ -12,6 +12,9 @@ const (
 	CMD_MALFORMED_DATA uint8 = 9
 	CMD_PORT_UNAVAIL   uint8 = 10
 	CMD_OP_FAILED      uint8 = 11
+	CMD_SERVICES_LIMIT uint8 = 12
+	CMD_PIPES_LIMIT    uint8 = 13
+	CMD_NOT_AVAILABLE  uint8 = 14
 )
 
 type Cmd struct {

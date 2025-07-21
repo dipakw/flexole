@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"flexole/mods/cmd"
+	"fmt"
 	"io"
 	"strings"
 )
@@ -70,10 +71,23 @@ func (s *Server) cmdAddService(userID string, data []byte) uint8 {
 		return cmd.CMD_MALFORMED_DATA
 	}
 
+	user := s.User(userID)
+	limit := s.conf.LimitFN(userID, fmt.Sprintf("service:%s", service.Net))
+
+	if limit == 0 {
+		s.conf.Log.Inff("Services limit is 0 => user: %s | net: %s", userID, service.Net)
+		return cmd.CMD_NOT_AVAILABLE
+	}
+
+	if user.services.count(service.Net) >= limit {
+		s.conf.Log.Inff("Services limit reached => user: %s | net: %s | limit: %d", userID, service.Net, s.conf.LimitFN(userID, service.Net))
+		return cmd.CMD_SERVICES_LIMIT
+	}
+
 	s.conf.Log.Inff("Command [ADD_SERVICE] => user: %s | net: %s | port: %d | id: %d", userID, service.Net, service.Port, service.ID)
 
 	// Add service to server user services list.
-	_, status := s.User(userID).services.add(&service)
+	_, status := user.services.add(&service)
 
 	return status
 }
