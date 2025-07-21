@@ -57,7 +57,7 @@ func (s *Server) Start() error {
 	s.listener, err = net.Listen(s.conf.Net, s.conf.Addr)
 
 	if err != nil {
-		return nil
+		return err
 	}
 
 	s.wg.Add(1)
