@@ -98,7 +98,7 @@ func getServerQuickConfig(opts map[string]string) (*ServerConfig, error) {
 				ID:       "quick",
 				Enabled:  true,
 				Key:      opts["quick"],
-				MaxPipes: 1,
+				MaxPipes: 15,
 				MaxServices: MaxServices{
 					Unix: 5,
 					TCP:  5,
