@@ -146,8 +146,9 @@ func getClientQuickConfig(opts map[string]string) (*ClientConfig, error) {
 		return nil, fmt.Errorf("invalid remote addr: %s", remoteAddr)
 	}
 
-	if err != nil {
+	if err != nil && strings.Contains(err.Error(), "missing port") {
 		serverPort = DEFAULT_PORT
+		serverHost = remoteAddr
 		err = nil
 	}
 
