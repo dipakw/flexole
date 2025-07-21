@@ -1,0 +1,37 @@
+version: 1.0.0
+
+config:
+  net: tcp
+  addr: localhost:8887
+
+logs:
+  allow:
+    - info
+    - warn
+    - error
+
+  outs:
+    - to: stdout
+      color: true
+
+    - to: file
+      path: report.log
+
+users:
+  - id: foo
+    enabled: true
+    key: secret1
+    max_pipes: 4
+    max_services:
+      unix: 2
+      tcp: 2
+      udp: 1
+
+  - id: bar
+    enabled: true
+    key: secret2
+    max_pipes: 4
+    max_services:
+      unix: 2
+      tcp: 2
+      udp: 1

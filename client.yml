@@ -1,0 +1,49 @@
+version: 1.0.0
+
+auth:
+  id: foo
+  key: secret1
+
+server:
+  net: tcp
+  addr: localhost:8887
+
+pipes:
+  - id: one
+    enabled: true
+    encrypt: true
+
+  - id: two
+    enabled: true
+    encrypt: false
+
+services:
+  - id: 100
+    enabled: true
+
+    local:
+      net: tcp
+      addr: localhost:6060
+
+    remote:
+      net: tcp
+      port: 12001
+
+    pipes:
+      - one
+      - two
+
+  - id: 101
+    enabled: true
+
+    local:
+      net: unix
+      addr: /tmp/hello.sock
+
+    remote:
+      net: tcp
+      port: 12002
+
+    pipes:
+      - one
+      - two
