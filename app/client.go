@@ -53,7 +53,7 @@ func startClient(config *ClientConfig) {
 				ID:    service.ID,
 				Net:   service.Remote.Net,
 				Port:  uint16(service.Remote.Port),
-				Pipes: service.Remote.Pipes,
+				Pipes: service.Pipes,
 			},
 		})
 

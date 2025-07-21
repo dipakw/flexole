@@ -190,9 +190,10 @@ func getClientQuickConfig(opts map[string]string) (*ClientConfig, error) {
 				Remote: RemoteConf{
 					Net:  remoteNet,
 					Port: remotePort,
-					Pipes: []string{
-						fmt.Sprintf("pipe:%d", id),
-					},
+				},
+
+				Pipes: []string{
+					fmt.Sprintf("pipe:%d", id),
 				},
 			},
 		},

@@ -71,10 +71,10 @@ type Service struct {
 	Enabled bool       `yaml:"enabled"`
 	Local   Addr       `yaml:"local"`
 	Remote  RemoteConf `yaml:"remote"`
+	Pipes   []string   `yaml:"pipes"`
 }
 
 type RemoteConf struct {
-	Net   string   `yaml:"net"`
-	Port  int      `yaml:"port"`
-	Pipes []string `yaml:"pipes"`
+	Net  string `yaml:"net"`
+	Port int    `yaml:"port"`
 }
