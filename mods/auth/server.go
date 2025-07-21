@@ -184,6 +184,10 @@ func Server(clientConn net.Conn, args *ServerOpts) *Auth {
 
 	// Step 9: Verify the signature
 	if ok, err := args.VerifySig(res, challengeRead, dsig); !ok {
+		if err == nil {
+			err = errors.New("signatures didn't match")
+		}
+
 		return res.re(&Err{
 			reason: "failed to verify the signature",
 			err:    err,
