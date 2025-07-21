@@ -3,6 +3,7 @@ package client
 import (
 	"crypto/sha256"
 	"flexole/mods/auth"
+	"fmt"
 	"net"
 	"time"
 
@@ -43,7 +44,7 @@ func (pp *Pipes) Add(id string, encrypt bool) error {
 	})
 
 	if !auth.Ok() {
-		return auth.Err().Main()
+		return fmt.Errorf("auth failed: %s : %s", auth.Err().Reason(), auth.Err().Main().Error())
 	}
 
 	useConn := conn
