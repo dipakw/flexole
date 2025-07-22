@@ -9,6 +9,42 @@ import (
 var cli_doc = strings.TrimSpace(`
 Usage:
   flexole <command> [options]
+
+Commands:
+  server, s      Start the server
+  client, c      Start the client
+  generate, g    Generate sample config files
+  help, h        Show this help message
+
+Options (server):
+  --config, -c    Path to server config file (default: server.yml)
+  --quick, -q     Quick start with user key (overrides config)
+  --log, -o       Log levels: i=info, w=warn, e=error (default: iwe)
+  --host, -h      Server host (default: 0.0.0.0)
+  --port, -p      Server port (default: 8887)
+
+Options (client):
+  --config, -c     Path to client config file (default: client.yml)
+  --quick, -q      Quick start with user key (overrides config)
+  --log, -o        Log levels: i=info, w=warn, e=error (default: iwe)
+  --local, -l      Local address, e.g. tcp/localhost:8080
+  --remote, -r     Remote, e.g. tcp/80@192.168.1.100
+  --id             Service ID (0-65535)
+  --encrypt, -e    Enable encryption (default: 1)
+
+Options (generate):
+  --client-config, -cc  Output client config file (default: client.yml)
+  --server-config, -sc  Output server config file (default: server.yml)
+
+Examples:
+  flexole server --config=server.yml
+  flexole client --quick=mykey --local=tcp/127.0.0.1:8080 --remote=tcp/80@192.168.1.100 --id=1
+  flexole generate --client-config=client.yml --server-config=server.yml
+  flexole help
+
+Notes:
+  - For log levels, combine letters (e.g., "iwe" for info, warn, error).
+  - All options can use either --long or -short forms.
 `)
 
 var parseArgs = map[string]bool{
