@@ -1,7 +1,13 @@
 package main
 
-import "flexole/app"
+import (
+	"embed"
+	"flexole/app"
+)
+
+//go:embed server.yml client.yml
+var samples embed.FS
 
 func main() {
-	app.Run()
+	app.Run(&samples)
 }

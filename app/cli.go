@@ -21,6 +21,9 @@ var parseArgs = map[string]bool{
 	"--remote":  true,
 	"--id":      true,
 	"--encrypt": true,
+
+	"--client-config": true,
+	"--server-config": true,
 }
 
 var parseArgsShort = map[string]bool{
@@ -33,6 +36,9 @@ var parseArgsShort = map[string]bool{
 	"-r": true,
 	"-i": true,
 	"-e": true,
+
+	"-cc": true,
+	"-sc": true,
 }
 
 var mapShortToLong = map[string]string{
@@ -45,6 +51,9 @@ var mapShortToLong = map[string]string{
 	"-r": "--remote",
 	"-i": "--id",
 	"-e": "--encrypt",
+
+	"-cc": "--client-config",
+	"-sc": "--server-config",
 }
 
 func NewCli(defaultOpts map[string]string) *Cli {

@@ -1,11 +1,12 @@
 package app
 
 import (
+	"embed"
 	"fmt"
 	"os"
 )
 
-func Run() {
+func Run(samples *embed.FS) {
 	if len(os.Args) < 2 {
 		fmt.Println(cli_doc)
 		return
@@ -33,6 +34,12 @@ func Run() {
 		}
 
 		startClient(config)
+
+	case "generate", "g":
+		if err := generateConfig(samples); err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 
 	case "help", "h":
 		fmt.Println(cli_doc)
