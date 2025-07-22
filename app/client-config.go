@@ -57,25 +57,25 @@ func loadClientConfigFile(file string) (*ClientConfig, error) {
 }
 
 func prepareQuickClientConfig(args map[string]*CliArg) (*ClientConfig, error) {
-	quick, err := parseClientQuickArg(args["quick"].Value())
+	quick, err := parseClientQuickArg(args["quick"])
 
 	if err != nil {
 		return nil, err
 	}
 
-	id, err := parseClientIdArg(args["id"].Value())
+	id, err := parseClientIdArg(args["id"])
 
 	if err != nil {
 		return nil, err
 	}
 
-	local, err := parseClientLocalArg(args["local"].Value())
+	local, err := parseClientLocalArg(args["local"])
 
 	if err != nil {
 		return nil, err
 	}
 
-	server, remote, err := parseClientRemoteArg(args["remote"].Value())
+	server, remote, err := parseClientRemoteArg(args["remote"])
 
 	if err != nil {
 		return nil, err
@@ -116,13 +116,15 @@ func prepareQuickClientConfig(args map[string]*CliArg) (*ClientConfig, error) {
 	return config, nil
 }
 
-func parseClientLocalArg(arg string) (*Addr, error) {
-	if arg == "" {
-		return nil, fmt.Errorf("Required argument --local is missing")
+func parseClientLocalArg(arg *CliArg) (*Addr, error) {
+	val := arg.Value()
+
+	if val == "" {
+		return nil, fmt.Errorf("Required argument %s is missing", arg.Name)
 	}
 
-	invalidFormat := fmt.Errorf(`Invalid argument --local, format: [protocol]/[address], example: tcp/localhost:8080`)
-	parts := strings.SplitN(arg, "/", 2)
+	invalidFormat := fmt.Errorf(`Invalid argument %s, format: [protocol]/[address], example: tcp/localhost:8080`, arg.Name)
+	parts := strings.SplitN(val, "/", 2)
 
 	if len(parts) != 2 {
 		return nil, invalidFormat
@@ -136,13 +138,15 @@ func parseClientLocalArg(arg string) (*Addr, error) {
 	return addr, nil
 }
 
-func parseClientRemoteArg(arg string) (*Addr, *NetPort, error) {
-	if arg == "" {
-		return nil, nil, fmt.Errorf("Required argument --remote is missing")
+func parseClientRemoteArg(arg *CliArg) (*Addr, *NetPort, error) {
+	val := arg.Value()
+
+	if val == "" {
+		return nil, nil, fmt.Errorf("Required argument %s is missing", arg.Name)
 	}
 
-	invalidFormat := fmt.Errorf(`Invalid argument --remote, format: [protocol]/[port]@[server], example: tcp/80@192.168.1.100`)
-	parts := strings.SplitN(arg, "@", 2)
+	invalidFormat := fmt.Errorf(`Invalid argument %s, format: [protocol]/[port]@[server], example: tcp/80@192.168.1.100`, arg.Name)
+	parts := strings.SplitN(val, "@", 2)
 
 	if len(parts) != 2 {
 		return nil, nil, invalidFormat
@@ -175,14 +179,16 @@ func parseClientRemoteArg(arg string) (*Addr, *NetPort, error) {
 	return addr, netPortConf, nil
 }
 
-func parseClientIdArg(arg string) (uint16, error) {
-	if arg == "" {
-		return 0, fmt.Errorf("Required argument --id is missing")
+func parseClientIdArg(arg *CliArg) (uint16, error) {
+	val := arg.Value()
+
+	if val == "" {
+		return 0, fmt.Errorf("Required argument %s is missing", arg.Name)
 	}
 
-	invalidFormat := fmt.Errorf(`Invalid argument --id, it should be a number between 0 and 65535`)
+	invalidFormat := fmt.Errorf(`Invalid argument %s, it should be a number between 0 and 65535`, arg.Name)
 
-	id, err := strconv.Atoi(arg)
+	id, err := strconv.Atoi(val)
 
 	if err != nil || id < 0 || id > 65535 {
 		return 0, invalidFormat
@@ -191,10 +197,12 @@ func parseClientIdArg(arg string) (uint16, error) {
 	return uint16(id), nil
 }
 
-func parseClientQuickArg(arg string) (string, error) {
-	if arg == "" {
-		return "", fmt.Errorf("Required argument --quick is missing")
+func parseClientQuickArg(arg *CliArg) (string, error) {
+	val := arg.Value()
+
+	if val == "" {
+		return "", fmt.Errorf("Required argument %s is missing", arg.Name)
 	}
 
-	return arg, nil
+	return val, nil
 }

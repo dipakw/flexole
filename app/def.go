@@ -6,7 +6,7 @@ const (
 
 type Cli struct {
 	main        string
-	opts        map[string]string
+	opts        map[string]*ValName
 	defaultOpts map[string]string
 }
 
@@ -14,6 +14,12 @@ type CliArg struct {
 	Passed  bool
 	Input   string
 	Default string
+	Name    string
+}
+
+type ValName struct {
+	Val  string
+	Name string
 }
 
 type Addr struct {

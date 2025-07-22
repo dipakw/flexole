@@ -14,7 +14,7 @@ func Run() {
 	cmd := os.Args[1]
 
 	switch cmd {
-	case "server":
+	case "server", "s":
 		config, err := getServerConfig()
 
 		if err != nil {
@@ -24,7 +24,7 @@ func Run() {
 
 		startServer(config)
 
-	case "client":
+	case "client", "c":
 		config, err := getClientConfig()
 
 		if err != nil {
@@ -34,7 +34,7 @@ func Run() {
 
 		startClient(config)
 
-	case "help":
+	case "help", "h":
 		fmt.Println(cli_doc)
 
 	default:
