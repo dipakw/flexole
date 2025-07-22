@@ -36,7 +36,7 @@ func getClientConfig() (*ClientConfig, error) {
 
 func loadClientConfigFile(file string) (*ClientConfig, error) {
 	if file == "" {
-		return nil, fmt.Errorf("no config file provided")
+		return nil, fmt.Errorf("No config file provided")
 	}
 
 	var config ClientConfig
