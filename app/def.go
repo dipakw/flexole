@@ -4,9 +4,26 @@ const (
 	DEFAULT_PORT = "8887"
 )
 
+type Cli struct {
+	main        string
+	opts        map[string]string
+	defaultOpts map[string]string
+}
+
+type CliArg struct {
+	Passed  bool
+	Input   string
+	Default string
+}
+
 type Addr struct {
 	Net  string `yaml:"net"`
 	Addr string `yaml:"addr"`
+}
+
+type NetPort struct {
+	Net  string `yaml:"net"`
+	Port uint16 `yaml:"port"`
 }
 
 /**
@@ -14,8 +31,8 @@ type Addr struct {
  */
 type ServerConfig struct {
 	Version string `yaml:"version"`
-	Config  Addr   `yaml:"config"`
-	Logs    Logs   `yaml:"logs"`
+	Config  *Addr  `yaml:"config"`
+	Logs    *Logs  `yaml:"logs"`
 	Users   []User `yaml:"users"`
 }
 
@@ -48,11 +65,11 @@ type MaxServices struct {
  * Client config.
  */
 type ClientConfig struct {
-	Version  string    `yaml:"version"`
-	Auth     Auth      `yaml:"auth"`
-	Server   Addr      `yaml:"server"`
-	Pipes    []Pipe    `yaml:"pipes"`
-	Services []Service `yaml:"services"`
+	Version  string     `yaml:"version"`
+	Auth     *Auth      `yaml:"auth"`
+	Server   *Addr      `yaml:"server"`
+	Pipes    []*Pipe    `yaml:"pipes"`
+	Services []*Service `yaml:"services"`
 }
 
 type Auth struct {
@@ -67,14 +84,9 @@ type Pipe struct {
 }
 
 type Service struct {
-	ID      uint16     `yaml:"id"`
-	Enabled bool       `yaml:"enabled"`
-	Local   Addr       `yaml:"local"`
-	Remote  RemoteConf `yaml:"remote"`
-	Pipes   []string   `yaml:"pipes"`
-}
-
-type RemoteConf struct {
-	Net  string `yaml:"net"`
-	Port int    `yaml:"port"`
+	ID      uint16   `yaml:"id"`
+	Enabled bool     `yaml:"enabled"`
+	Local   *Addr    `yaml:"local"`
+	Remote  *NetPort `yaml:"remote"`
+	Pipes   []string `yaml:"pipes"`
 }
