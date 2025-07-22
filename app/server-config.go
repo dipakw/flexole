@@ -4,58 +4,40 @@ import (
 	"fmt"
 	"net"
 	"os"
-	"strconv"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
 
-func getServerConfig(opts map[string]string) (*ServerConfig, error) {
-	configFile, configPassed := opts["config"]
+func getServerConfig() (*ServerConfig, error) {
+	cli := NewCli(map[string]string{
+		"quick":  "quick",
+		"log":    "iwe",
+		"config": "server.yml",
+		"host":   "0.0.0.0",
+		"port":   DEFAULT_PORT,
+	})
 
-	if !configPassed {
-		configFile = "server.yml"
+	args := cli.Gets(
+		"quick",
+		"log",
+		"config",
+		"host",
+		"port",
+	)
+
+	if args["quick"].Passed && !args["config"].Passed {
+		return prepareQuickServerConfig(args)
 	}
 
-	quickCode, quickPassed := opts["quick"]
-
-	if !quickPassed {
-		configPassed = true
-	}
-
-	isQuick := quickPassed && !configPassed
-
-	if !isQuick && configFile == "" {
-		return nil, fmt.Errorf("no config file provided")
-	}
-
-	if isQuick && quickCode == "" {
-		quickCode = "quick"
-		opts["quick"] = quickCode
-	}
-
-	if isQuick {
-		port, ok := opts["port"]
-
-		if !ok || port == "" {
-			port = DEFAULT_PORT
-			opts["port"] = port
-		}
-
-		portInt, err := strconv.Atoi(port)
-
-		if err != nil || portInt < 1 || portInt > 65535 {
-			return nil, fmt.Errorf("invalid port")
-		}
-	}
-
-	if isQuick {
-		return getServerQuickConfig(opts)
-	}
-
-	return readServerConfig(configFile)
+	return loadServerConfigFile(args["config"].Value())
 }
 
-func readServerConfig(file string) (*ServerConfig, error) {
+func loadServerConfigFile(file string) (*ServerConfig, error) {
+	if file == "" {
+		return nil, fmt.Errorf("No config file provided")
+	}
+
 	var config ServerConfig
 
 	fileBytes, err := os.ReadFile(file)
@@ -73,17 +55,34 @@ func readServerConfig(file string) (*ServerConfig, error) {
 	return &config, nil
 }
 
-func getServerQuickConfig(opts map[string]string) (*ServerConfig, error) {
+func prepareQuickServerConfig(args map[string]*CliArg) (*ServerConfig, error) {
+	allowLogs := []string{}
+	logConf := args["log"].Value()
+
+	if logConf != "off" {
+		if strings.Contains(logConf, "i") {
+			allowLogs = append(allowLogs, "info")
+		}
+
+		if strings.Contains(logConf, "w") {
+			allowLogs = append(allowLogs, "warn")
+		}
+
+		if strings.Contains(logConf, "e") {
+			allowLogs = append(allowLogs, "error")
+		}
+	}
+
 	config := &ServerConfig{
 		Version: "1.0.0",
 
-		Config: Addr{
+		Config: &Addr{
 			Net:  "tcp",
-			Addr: net.JoinHostPort("0.0.0.0", opts["port"]),
+			Addr: net.JoinHostPort(args["host"].Value(), args["port"].Value()),
 		},
 
-		Logs: Logs{
-			Allow: []string{"info", "warn", "error"},
+		Logs: &Logs{
+			Allow: allowLogs,
 
 			Outs: []LogOut{
 				{
@@ -97,7 +96,7 @@ func getServerQuickConfig(opts map[string]string) (*ServerConfig, error) {
 			{
 				ID:       "quick",
 				Enabled:  true,
-				Key:      opts["quick"],
+				Key:      args["quick"].Value(),
 				MaxPipes: 15,
 				MaxServices: MaxServices{
 					Unix: 5,
