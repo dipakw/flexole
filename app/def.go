@@ -32,16 +32,6 @@ type NetPort struct {
 	Port uint16 `yaml:"port"`
 }
 
-/**
- * Server config.
- */
-type ServerConfig struct {
-	Version string `yaml:"version"`
-	Config  *Addr  `yaml:"config"`
-	Logs    *Logs  `yaml:"logs"`
-	Users   []User `yaml:"users"`
-}
-
 type Logs struct {
 	Allow []string `yaml:"allow"`
 	Outs  []LogOut `yaml:"outs"`
@@ -51,6 +41,16 @@ type LogOut struct {
 	To    string `yaml:"to"`
 	Color bool   `yaml:"color,omitempty"` // only relevant for stdout
 	Path  string `yaml:"path,omitempty"`  // only relevant for file
+}
+
+/**
+ * Server config.
+ */
+type ServerConfig struct {
+	Version string `yaml:"version"`
+	Config  *Addr  `yaml:"config"`
+	Logs    *Logs  `yaml:"logs"`
+	Users   []User `yaml:"users"`
 }
 
 type User struct {
@@ -73,6 +73,7 @@ type MaxServices struct {
 type ClientConfig struct {
 	Version  string     `yaml:"version"`
 	Auth     *Auth      `yaml:"auth"`
+	Logs     *Logs      `yaml:"logs"`
 	Server   *Addr      `yaml:"server"`
 	Pipes    []*Pipe    `yaml:"pipes"`
 	Services []*Service `yaml:"services"`

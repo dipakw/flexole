@@ -18,7 +18,7 @@ func startServer(conf *ServerConfig) (*server.Server, error) {
 	defer manager.Reset()
 
 	logger := logs.New(&logs.Config{
-		Allow: logs.ALL,
+		Allow: util.LogKindsToFlag(conf.Logs.Allow),
 
 		Outs: []*logs.Out{
 			{

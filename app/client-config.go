@@ -90,6 +90,17 @@ func prepareQuickClientConfig(args map[string]*CliArg) (*ClientConfig, error) {
 			Key: quick,
 		},
 
+		Logs: &Logs{
+			Allow: util.LogShortToKinds(args["log"].Value()),
+
+			Outs: []LogOut{
+				{
+					To:    "stdout",
+					Color: true,
+				},
+			},
+		},
+
 		Server: server,
 
 		Pipes: []*Pipe{

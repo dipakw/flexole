@@ -1,10 +1,10 @@
 package app
 
 import (
+	"flexole/mods/util"
 	"fmt"
 	"net"
 	"os"
-	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -56,23 +56,6 @@ func loadServerConfigFile(file string) (*ServerConfig, error) {
 }
 
 func prepareQuickServerConfig(args map[string]*CliArg) (*ServerConfig, error) {
-	allowLogs := []string{}
-	logConf := args["log"].Value()
-
-	if logConf != "off" {
-		if strings.Contains(logConf, "i") {
-			allowLogs = append(allowLogs, "info")
-		}
-
-		if strings.Contains(logConf, "w") {
-			allowLogs = append(allowLogs, "warn")
-		}
-
-		if strings.Contains(logConf, "e") {
-			allowLogs = append(allowLogs, "error")
-		}
-	}
-
 	config := &ServerConfig{
 		Version: "1.0.0",
 
@@ -82,7 +65,7 @@ func prepareQuickServerConfig(args map[string]*CliArg) (*ServerConfig, error) {
 		},
 
 		Logs: &Logs{
-			Allow: allowLogs,
+			Allow: util.LogShortToKinds(args["log"].Value()),
 
 			Outs: []LogOut{
 				{
