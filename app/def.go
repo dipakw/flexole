@@ -1,7 +1,8 @@
 package app
 
 const (
-	DEFAULT_PORT = "8887"
+	DEFAULT_PORT       = "8887"
+	DEFAULT_LOCAL_HOST = "localhost"
 )
 
 type Cli struct {

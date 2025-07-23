@@ -144,9 +144,17 @@ func parseClientLocalArg(arg *CliArg) (*Addr, error) {
 		return nil, invalidFormat
 	}
 
+	localNet := parts[0]
+	localAddr := parts[1]
+	localAddr, err := util.NetAddrDefault(localNet, localAddr, DEFAULT_LOCAL_HOST)
+
+	if err != nil {
+		return nil, err
+	}
+
 	addr := &Addr{
-		Net:  parts[0],
-		Addr: parts[1],
+		Net:  localNet,
+		Addr: localAddr,
 	}
 
 	return addr, nil
