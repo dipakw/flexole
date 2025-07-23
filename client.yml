@@ -17,6 +17,19 @@ pipes:
     enabled: true
     encrypt: false
 
+logs:
+  allow:
+    - info
+    - warn
+    - error
+
+  outs:
+    - to: stdout
+      color: true
+
+    - to: file
+      path: report.log
+
 services:
   - id: 100
     enabled: true
