@@ -18,7 +18,6 @@ func (s *Server) handle(ctx context.Context, conn net.Conn) {
 
 	// Authenticate.
 	auth := auth.Server(conn, &auth.ServerOpts{
-		Timeout:     10 * time.Second,
 		MaxSigSize:  60,
 		MinSigSize:  60,
 		DelayOnAuth: 15 * time.Millisecond,
@@ -82,6 +81,19 @@ func (s *Server) handle(ctx context.Context, conn net.Conn) {
 			s.conf.Log.Errf("Failed to set up encryption => user: %s | addr: %s | error: %s", userId, conn.RemoteAddr(), err.Error())
 			return
 		}
+	}
+
+	// Wait for OK.
+	buf := make([]byte, 2)
+
+	if _, err := useConn.Read(buf); err != nil {
+		s.conf.Log.Errf("Failed to read OK => user: %s | addr: %s | error: %s", userId, conn.RemoteAddr(), err.Error())
+		return
+	}
+
+	if string(buf) != "OK" {
+		s.conf.Log.Errf("Invalid OK response => user: %s | addr: %s | response: %s", userId, conn.RemoteAddr(), string(buf))
+		return
 	}
 
 	// Init mux.

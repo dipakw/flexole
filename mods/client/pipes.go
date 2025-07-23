@@ -60,6 +60,11 @@ func (pp *Pipes) Add(id string, encrypt bool) error {
 		}
 	}
 
+	// Send OK
+	if _, err := useConn.Write([]byte("OK")); err != nil {
+		return err
+	}
+
 	sess, err := smux.Client(useConn, smux.DefaultConfig())
 
 	// Set up control channel.
