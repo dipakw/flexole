@@ -23,7 +23,7 @@ func NetAddr(addr string, defaultPort string) (string, error) {
 }
 
 func NetAddrDefault(network string, addr string, defaultHost string) (string, error) {
-	if network == "tcp" || network == "udp" {
+	if network != "tcp" && network != "udp" {
 		return addr, nil
 	}
 
