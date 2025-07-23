@@ -23,7 +23,16 @@ func Run(samples *embed.FS) {
 			os.Exit(1)
 		}
 
-		startServer(config)
+		server, err := startServer(config)
+
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		fmt.Printf("Server started: %s://%s\n", server.Net(), server.Addr())
+
+		server.Wait()
 
 	case "client", "c":
 		config, err := getClientConfig()

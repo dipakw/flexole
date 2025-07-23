@@ -3,13 +3,14 @@ package app
 import (
 	"flexole/mods/server"
 	"flexole/mods/services"
+	"flexole/mods/util"
 	"fmt"
 	"os"
 
 	"github.com/dipakw/logs"
 )
 
-func startServer(conf *ServerConfig) {
+func startServer(conf *ServerConfig) (*server.Server, error) {
 	manager := services.Manager(&services.Config{
 		Dir: "./tmp", // TODO: make it configurable
 	})
@@ -27,6 +28,12 @@ func startServer(conf *ServerConfig) {
 		},
 	})
 
+	addr, err := util.NetAddr(conf.Config.Addr, DEFAULT_PORT)
+
+	if err != nil {
+		return nil, err
+	}
+
 	users := map[string]*User{}
 
 	for _, user := range conf.Users {
@@ -35,7 +42,7 @@ func startServer(conf *ServerConfig) {
 
 	flexole, err := server.New(&server.Config{
 		Net:     conf.Config.Net,
-		Addr:    conf.Config.Addr,
+		Addr:    addr,
 		Manager: manager,
 		Log:     logger,
 
@@ -78,16 +85,12 @@ func startServer(conf *ServerConfig) {
 	})
 
 	if err != nil {
-		logger.Err(err)
-		return
+		return nil, err
 	}
 
 	if err := flexole.Start(); err != nil {
-		logger.Err(err)
-		return
+		return nil, err
 	}
 
-	fmt.Printf("Server started: %s://%s\n", conf.Config.Net, conf.Config.Addr)
-
-	flexole.Wait()
+	return flexole, nil
 }

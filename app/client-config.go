@@ -1,6 +1,7 @@
 package app
 
 import (
+	"flexole/mods/util"
 	"fmt"
 	"os"
 	"strconv"
@@ -158,6 +159,12 @@ func parseClientRemoteArg(arg *CliArg) (*Addr, *NetPort, error) {
 
 	if len(netPortParts) != 2 {
 		return nil, nil, invalidFormat
+	}
+
+	serverAddr, err := util.NetAddr(serverAddr, DEFAULT_PORT)
+
+	if err != nil {
+		return nil, nil, fmt.Errorf("Invalid server address: %s", err.Error())
 	}
 
 	addr := &Addr{

@@ -86,6 +86,14 @@ func (s *Server) Start() error {
 	return nil
 }
 
+func (s *Server) Addr() string {
+	return s.conf.Addr
+}
+
+func (s *Server) Net() string {
+	return s.conf.Net
+}
+
 func (s *Server) Wait() {
 	s.wg.Wait()
 }
