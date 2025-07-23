@@ -10,6 +10,7 @@ func NetAddr(addr string, defaultPort string) (string, error) {
 
 	if err != nil {
 		if strings.Contains(err.Error(), "missing port") || port == "" {
+			host = addr
 			port = defaultPort
 		} else {
 			return "", err
