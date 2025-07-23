@@ -96,8 +96,16 @@ func (c *Client) handle(stream *smux.Stream) {
 		}
 
 		relay(c.ctx, conn, stream)
-	} else {
-		fmt.Println("Service not supported:", service.Local.Net)
+
+		return
 	}
 
+	if service.Local.Net == "udp" {
+		c.relayUDP(service, stream)
+		return
+	}
+
+	fmt.Println("Service not supported:", service.Local.Net)
+
+	return
 }

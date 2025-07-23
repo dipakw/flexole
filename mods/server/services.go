@@ -4,6 +4,7 @@ import (
 	"flexole/mods/cmd"
 	"flexole/mods/services"
 	"net"
+	"time"
 )
 
 func (ss *Services) add(service *Service) (*Service, uint8) {
@@ -21,10 +22,11 @@ func (ss *Services) add(service *Service) (*Service, uint8) {
 	ss.user.servicesList[service.ID] = service
 
 	_, err := user.Start(&services.Service{
-		ID:   service.ID,
-		Host: "",
-		Port: service.Port,
-		Type: service.Net,
+		ID:      service.ID,
+		Host:    "",
+		Port:    service.Port,
+		Type:    service.Net,
+		Timeout: 10 * time.Second, // TODO: Make this configurable.
 
 		SrcFN: func(info *services.Info) (net.Conn, error) {
 			return ss.server.srcfn(ss.user.id, info)

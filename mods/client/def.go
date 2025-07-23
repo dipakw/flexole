@@ -8,6 +8,10 @@ import (
 	"github.com/xtaci/smux"
 )
 
+const (
+	MAX_UDP_PACKET_SIZE = 65535
+)
+
 type Config struct {
 	ID     []byte
 	Key    []byte
