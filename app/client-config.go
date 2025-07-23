@@ -16,6 +16,7 @@ func getClientConfig() (*ClientConfig, error) {
 		"log":     "iwe",
 		"config":  "client.yml",
 		"encrypt": "1",
+		"user":    "quick",
 	})
 
 	args := cli.Gets(
@@ -26,6 +27,7 @@ func getClientConfig() (*ClientConfig, error) {
 		"remote",
 		"id",
 		"encrypt",
+		"user",
 	)
 
 	if args["quick"].Passed && !args["config"].Passed {
@@ -86,7 +88,7 @@ func prepareQuickClientConfig(args map[string]*CliArg) (*ClientConfig, error) {
 		Version: "1.0.0",
 
 		Auth: &Auth{
-			ID:  "quick",
+			ID:  args["user"].Value(),
 			Key: quick,
 		},
 

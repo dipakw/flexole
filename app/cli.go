@@ -18,14 +18,16 @@ Commands:
 
 Options (server):
   --config, -c    Path to server config file (default: server.yml)
-  --quick, -q     Quick start with user key (overrides config)
+  --quick, -q     Quick start with user key
+  --user, -u      User ID (default: quick)
   --log, -o       Log levels: i=info, w=warn, e=error (default: iwe)
   --host, -h      Server host (default: 0.0.0.0)
   --port, -p      Server port (default: 8887)
 
 Options (client):
   --config, -c     Path to client config file (default: client.yml)
-  --quick, -q      Quick start with user key (overrides config)
+  --quick, -q      Quick start with user key
+  --user, -u       User ID (default: quick)
   --log, -o        Log levels: i=info, w=warn, e=error (default: iwe)
   --local, -l      Local address, e.g. tcp/localhost:8080
   --remote, -r     Remote, e.g. tcp/80@192.168.1.100
@@ -49,6 +51,7 @@ Notes:
 
 var parseArgs = map[string]bool{
 	"--quick":   true,
+	"--user":    true,
 	"--config":  true,
 	"--log":     true,
 	"--host":    true,
@@ -64,6 +67,7 @@ var parseArgs = map[string]bool{
 
 var parseArgsShort = map[string]bool{
 	"-q": true,
+	"-u": true,
 	"-c": true,
 	"-o": true,
 	"-h": true,
@@ -79,6 +83,7 @@ var parseArgsShort = map[string]bool{
 
 var mapShortToLong = map[string]string{
 	"-q": "--quick",
+	"-u": "--user",
 	"-c": "--config",
 	"-o": "--log",
 	"-h": "--host",

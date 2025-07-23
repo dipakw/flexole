@@ -16,6 +16,7 @@ func getServerConfig() (*ServerConfig, error) {
 		"config": "server.yml",
 		"host":   "0.0.0.0",
 		"port":   DEFAULT_PORT,
+		"user":   "quick",
 	})
 
 	args := cli.Gets(
@@ -24,6 +25,7 @@ func getServerConfig() (*ServerConfig, error) {
 		"config",
 		"host",
 		"port",
+		"user",
 	)
 
 	if args["quick"].Passed && !args["config"].Passed {
@@ -77,7 +79,7 @@ func prepareQuickServerConfig(args map[string]*CliArg) (*ServerConfig, error) {
 
 		Users: []User{
 			{
-				ID:       "quick",
+				ID:       args["user"].Value(),
 				Enabled:  true,
 				Key:      args["quick"].Value(),
 				MaxPipes: 15,
