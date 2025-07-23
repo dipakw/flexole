@@ -55,11 +55,12 @@ type Pipes struct {
 }
 
 type Pipe struct {
-	userID string
-	id     string
-	conn   net.Conn
-	sess   *smux.Session
-	ctrl   *smux.Stream
+	userID  string
+	id      string
+	conn    net.Conn
+	sess    *smux.Session
+	ctrl    *smux.Stream
+	encrypt bool
 }
 
 // Shared

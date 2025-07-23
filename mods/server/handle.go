@@ -108,11 +108,12 @@ func (s *Server) handle(ctx context.Context, conn net.Conn) {
 
 	// Add pipe.
 	pipe := user.pipes.add(&Pipe{
-		userID: userId,
-		id:     pipeId,
-		conn:   conn,
-		sess:   sess,
-		ctrl:   ctrl,
+		userID:  userId,
+		id:      pipeId,
+		conn:    conn,
+		sess:    sess,
+		ctrl:    ctrl,
+		encrypt: encrypt,
 	})
 
 	// Listen for control commands.

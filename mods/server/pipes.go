@@ -9,7 +9,7 @@ func (pp *Pipes) add(pipe *Pipe) *Pipe {
 	defer pp.user.mu.Unlock()
 	pp.user.pipesList[pipe.id] = pipe
 
-	pp.server.conf.Log.Inff("Pipe added => user: %s | addr: %s | id: %s", pp.user.id, pipe.conn.RemoteAddr(), pipe.id)
+	pp.server.conf.Log.Inff("Pipe added => user: %s | addr: %s | id: %s | encrypted: %v", pp.user.id, pipe.conn.RemoteAddr(), pipe.id, pipe.encrypt)
 
 	return pipe
 }
@@ -25,7 +25,7 @@ func (pp *Pipes) rem(id string) *Pipe {
 
 	delete(pp.user.pipesList, id)
 
-	pp.server.conf.Log.Inff("Pipe removed => user: %s | addr: %s | id: %s", pp.user.id, pipe.conn.RemoteAddr(), pipe.id)
+	pp.server.conf.Log.Inff("Pipe removed => user: %s | addr: %s | id: %s | encrypted: %v", pp.user.id, pipe.conn.RemoteAddr(), pipe.id, pipe.encrypt)
 
 	unpipedServicesIds := pp.user.services.unpipedUnsafe()
 
