@@ -3,6 +3,7 @@ package client
 import (
 	"encoding/json"
 	"flexole/mods/cmd"
+	"flexole/mods/util"
 	"fmt"
 )
 
@@ -32,7 +33,7 @@ func (ss *Services) Rem(id uint16) error {
 		return fmt.Errorf("service not found: %d", id)
 	}
 
-	if err := ss.c.sendCtrlCommand(false, cmd.CMD_REM_SERVICE, cmd.PackUint16(id)); err != nil {
+	if err := ss.c.sendCtrlCommand(false, cmd.CMD_REM_SERVICE, util.PackUint16(id)); err != nil {
 		return err
 	}
 

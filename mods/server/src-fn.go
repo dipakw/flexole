@@ -3,6 +3,7 @@ package server
 import (
 	"flexole/mods/cmd"
 	"flexole/mods/services"
+	"flexole/mods/util"
 	"fmt"
 	"net"
 	"sync"
@@ -75,7 +76,7 @@ func (s *Server) srcfn(userID string, info *services.Info) (net.Conn, error) {
 	}
 
 	// Send connect command.
-	if _, err := stream.Write(cmd.New(cmd.CMD_CONNECT, cmd.PackUint16(info.ID)).Pack()); err != nil {
+	if _, err := stream.Write(cmd.New(cmd.CMD_CONNECT, util.PackUint16(info.ID)).Pack()); err != nil {
 		s.conf.Log.Errf("Failed to send connect command => user: %s | service: %d | pipe: %s | error: %s", userID, info.ID, pipe.id, err.Error())
 		return nil, err
 	}

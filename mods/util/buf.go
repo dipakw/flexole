@@ -1,4 +1,4 @@
-package cmd
+package util
 
 func PackUint16(n uint16) []byte {
 	buf := make([]byte, 2)

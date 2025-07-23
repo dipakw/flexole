@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"flexole/mods/cmd"
+	"flexole/mods/util"
 	"fmt"
 	"io"
 	"strings"
@@ -93,7 +94,7 @@ func (s *Server) cmdAddService(userID string, data []byte) uint8 {
 }
 
 func (s *Server) cmdRemService(userID string, data []byte) uint8 {
-	id := cmd.UnpackUint16(data)
+	id := util.UnpackUint16(data)
 
 	s.conf.Log.Inff("Command [REM_SERVICE] => user: %s | id: %d", userID, id)
 

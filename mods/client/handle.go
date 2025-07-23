@@ -3,6 +3,7 @@ package client
 import (
 	"errors"
 	"flexole/mods/cmd"
+	"flexole/mods/util"
 	"fmt"
 	"io"
 	"net"
@@ -78,7 +79,7 @@ func (c *Client) handle(stream *smux.Stream) {
 		return
 	}
 
-	serviceID := cmd.UnpackUint16(command.Data)
+	serviceID := util.UnpackUint16(command.Data)
 
 	service, ok := c.servicesList[serviceID]
 
