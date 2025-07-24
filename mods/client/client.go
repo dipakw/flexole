@@ -44,3 +44,7 @@ func (c *Client) Shutdown() error {
 
 	return nil
 }
+
+func (c *Client) ServerAddr() string {
+	return c.conf.Server.Net + "/" + c.conf.Server.Addr
+}

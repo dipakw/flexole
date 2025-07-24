@@ -2,14 +2,16 @@ package app
 
 import (
 	"flexole/mods/client"
+	"flexole/mods/util"
 	"os"
+	"strings"
 
 	"github.com/dipakw/logs"
 )
 
-func startClient(config *ClientConfig) {
+func startClient(conf *ClientConfig) {
 	logger := logs.New(&logs.Config{
-		Allow: logs.ALL,
+		Allow: util.LogKindsToFlag(conf.Logs.Allow),
 
 		Outs: []*logs.Out{
 			{
@@ -20,12 +22,12 @@ func startClient(config *ClientConfig) {
 	})
 
 	tunnel, err := client.New(&client.Config{
-		ID:  []byte(config.Auth.ID),
-		Key: []byte(config.Auth.Key),
+		ID:  []byte(conf.Auth.ID),
+		Key: []byte(conf.Auth.Key),
 
 		Server: &client.Addr{
-			Net:  config.Server.Net,
-			Addr: config.Server.Addr,
+			Net:  conf.Server.Net,
+			Addr: conf.Server.Addr,
 		},
 	})
 
@@ -34,15 +36,28 @@ func startClient(config *ClientConfig) {
 		return
 	}
 
+	stop := false
+
 	// Add pipes.
-	for _, pipe := range config.Pipes {
+	for _, pipe := range conf.Pipes {
 		if err := tunnel.Pipes.Add(pipe.ID, pipe.Encrypt); err != nil {
+			stop = true
+
+			if strings.Contains(err.Error(), "connection refused") {
+				logger.Errf(`Failed to connect to server: %s`, tunnel.ServerAddr())
+				break
+			}
+
 			logger.Err(err)
 		}
 	}
 
+	if stop {
+		return
+	}
+
 	// Add services.
-	for _, service := range config.Services {
+	for _, service := range conf.Services {
 		_, err := tunnel.Services.Add(&client.Service{
 			Local: &client.Local{
 				Net:  service.Local.Net,
