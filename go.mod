@@ -3,7 +3,7 @@ module flexole
 go 1.24.5
 
 require (
-	github.com/dipakw/logs v1.2.0
+	github.com/dipakw/logs v1.3.0
 	github.com/dipakw/uconn v1.1.2
 	github.com/xtaci/smux v1.5.34
 	gopkg.in/yaml.v3 v3.0.1

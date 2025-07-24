@@ -5,6 +5,8 @@ import (
 	"flexole/mods/cmd"
 	"flexole/mods/util"
 	"fmt"
+
+	"github.com/dipakw/logs"
 )
 
 func (ss *Services) Add(s *Service) (uint16, error) {
@@ -31,7 +33,7 @@ func (ss *Services) Add(s *Service) (uint16, error) {
 	ss.c.wg.Add(1)
 
 	if msg != nil {
-		fmt.Println(string(msg))
+		ss.c.conf.Log.Must(logs.INFO, nil, string(msg))
 	}
 
 	return s.Remote.ID, nil
