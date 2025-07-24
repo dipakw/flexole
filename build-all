@@ -1,0 +1,91 @@
+#!/bin/bash
+
+set -e  # Exit on error
+
+BINARY_NAME="flexole"
+OUTPUT_DIR="release"
+mkdir -p "$OUTPUT_DIR"
+
+platforms=(
+  "linux/amd64"
+  "linux/arm64"
+  "darwin/amd64"
+  "darwin/arm64"
+  "windows/amd64"
+  "windows/arm64"
+)
+
+COUNT=0
+
+# Check if VERSION_TAG is set
+if [ -z "$VERSION_TAG" ]; then
+  echo "VERSION_TAG is not set"
+  exit 1
+fi
+
+# Remove v from the version
+APP_VERSION=${VERSION_TAG#v}
+
+# Replace "dev" with the app version
+FILE="main.go"
+SEARCH="dev"
+
+# Detect platform
+if [[ "$(uname)" == "Darwin" ]]; then
+  # macOS: requires empty string for -i
+  sed -i '' "s|$SEARCH|$APP_VERSION|g" "$FILE"
+else
+  # Linux: can use -i directly
+  sed -i "s|$SEARCH|$APP_VERSION|g" "$FILE"
+fi
+
+# Header
+HEADER=$(printf "%-22s | %-4s | %-4s" "| Platform" "Size" "Zip    |")
+SEPARATOR=$(printf '%.0s-' {1..40})
+
+# Green color code
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+echo -e "${YELLOW}$SEPARATOR${NC}"
+echo -e "${YELLOW}$HEADER${NC}"
+echo -e "${YELLOW}$SEPARATOR${NC}"
+
+for platform in "${platforms[@]}"; do
+  IFS="/" read -r GOOS GOARCH <<< "$platform"
+  binary_name="$BINARY_NAME"
+  [[ "$GOOS" == "windows" ]] && binary_name="$binary_name.exe"
+
+  output_path="$OUTPUT_DIR/$BINARY_NAME-$GOOS-$GOARCH"
+  binary_path="$output_path/$binary_name"
+  zip_name="$BINARY_NAME-$GOOS-$GOARCH.zip"
+  zip_path="$OUTPUT_DIR/$zip_name"
+
+  mkdir -p "$output_path"
+
+  if env GOOS=$GOOS GOARCH=$GOARCH go build -a -ldflags="-s -w" -gcflags=all="-l -B -C" -o "$binary_path" . 2>/dev/null; then
+    (cd "$output_path" && zip -r "../$zip_name" "$binary_name" > /dev/null)
+    COUNT=$((COUNT + 1))
+  fi
+
+  # Get sizes
+  size="--"
+  zipped_size="--"
+  if [ -f "$binary_path" ]; then
+    size=$(du -h "$binary_path" | cut -f1)
+  fi
+  if [ -f "$zip_path" ]; then
+    zipped_size=$(du -h "$zip_path" | cut -f1)
+  fi
+
+  # Output formatted row
+  row=$(printf "%-22s | %-4s | %-4s   |" "| $GOOS/$GOARCH" "$size" "$zipped_size")
+  # Dimmed grey color code
+  echo -e "${GREEN}$row${NC}"
+  echo -e "${GREEN}$SEPARATOR${NC}"
+
+  rm -rf "$output_path"
+done
+
+echo "✅ Version $APP_VERSION successfully built for $COUNT platforms."
