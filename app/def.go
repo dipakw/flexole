@@ -1,9 +1,16 @@
 package app
 
+import "embed"
+
 const (
 	DEFAULT_PORT       = "8887"
 	DEFAULT_LOCAL_HOST = "localhost"
 )
+
+type Config struct {
+	Version string
+	Samples *embed.FS
+}
 
 type Cli struct {
 	main        string

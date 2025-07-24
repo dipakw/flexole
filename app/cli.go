@@ -11,6 +11,7 @@ Usage:
   flexole <command> [options]
 
 Commands:
+  version, v     Show version
   server, s      Start the server
   client, c      Start the client
   generate, g    Generate sample config files

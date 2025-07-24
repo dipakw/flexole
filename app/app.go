@@ -1,12 +1,11 @@
 package app
 
 import (
-	"embed"
 	"fmt"
 	"os"
 )
 
-func Run(samples *embed.FS) {
+func Run(config *Config) {
 	if len(os.Args) < 2 {
 		fmt.Println(cli_doc)
 		return
@@ -15,6 +14,9 @@ func Run(samples *embed.FS) {
 	cmd := os.Args[1]
 
 	switch cmd {
+	case "version", "v":
+		fmt.Println("Version: " + config.Version)
+
 	case "server", "s":
 		config, err := getServerConfig()
 
@@ -45,7 +47,7 @@ func Run(samples *embed.FS) {
 		startClient(config)
 
 	case "generate", "g":
-		if err := generateConfig(samples); err != nil {
+		if err := generateConfig(config.Samples); err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
