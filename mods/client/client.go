@@ -32,7 +32,7 @@ func (c *Client) Wait() {
 }
 
 func (c *Client) Shutdown() error {
-	if err := c.sendCtrlCommand(true, cmd.CMD_SHUTDOWN, nil); err != nil {
+	if _, err := c.sendCtrlCommand(true, cmd.CMD_SHUTDOWN, nil); err != nil {
 		return err
 	}
 

@@ -18,7 +18,9 @@ func (ss *Services) Add(s *Service) (uint16, error) {
 		return 0, err
 	}
 
-	if err := ss.c.sendCtrlCommand(true, cmd.CMD_ADD_SERVICE, jsonBytes); err != nil {
+	msg, err := ss.c.sendCtrlCommand(true, cmd.CMD_ADD_SERVICE, jsonBytes)
+
+	if err != nil {
 		return 0, err
 	}
 
@@ -27,6 +29,10 @@ func (ss *Services) Add(s *Service) (uint16, error) {
 	ss.c.servicesList[s.Remote.ID] = s
 
 	ss.c.wg.Add(1)
+
+	if msg != nil {
+		fmt.Println(string(msg))
+	}
 
 	return s.Remote.ID, nil
 }
@@ -39,7 +45,7 @@ func (ss *Services) Rem(id uint16) error {
 		return nil
 	}
 
-	if err := ss.c.sendCtrlCommand(false, cmd.CMD_REM_SERVICE, util.PackUint16(id)); err != nil {
+	if _, err := ss.c.sendCtrlCommand(false, cmd.CMD_REM_SERVICE, util.PackUint16(id)); err != nil {
 		return err
 	}
 

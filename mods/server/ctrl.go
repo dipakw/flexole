@@ -48,28 +48,37 @@ func (s *Server) listenCtrl(ctx context.Context, pipe *Pipe) {
 
 func (s *Server) handleCommand(command *cmd.Cmd, pipe *Pipe) {
 	status := cmd.CMD_STATUS_UNKNOWN
+	response := []byte{}
 
 	switch command.ID {
 	case cmd.CMD_ADD_SERVICE:
-		status = s.cmdAddService(pipe.userID, command.Data)
+		var service *Service
+		status, service = s.cmdAddService(pipe.userID, command.Data)
+
+		if status == cmd.CMD_STATUS_OK && service != nil {
+			response = s.conf.EvtAddService(s, pipe.userID, service)
+		}
+
 	case cmd.CMD_REM_SERVICE:
 		status = s.cmdRemService(pipe.userID, command.Data)
+
 	case cmd.CMD_SHUTDOWN:
 		status = s.cmdShutdown(pipe.userID)
+
 	default:
 		s.conf.Log.Errf("Invalid command => user: %s | id: %d", pipe.userID, command.ID)
 		status = cmd.CMD_INVALID_CMD
 	}
 
-	pipe.ctrl.Write(cmd.New(status, nil).Pack())
+	pipe.ctrl.Write(cmd.New(status, response).Pack())
 }
 
-func (s *Server) cmdAddService(userID string, data []byte) uint8 {
+func (s *Server) cmdAddService(userID string, data []byte) (uint8, *Service) {
 	var service Service
 
 	if err := json.Unmarshal(data, &service); err != nil {
 		s.conf.Log.Errf("Malformed command [ADD_SERVICE] => user: %s | error: %s", userID, err.Error())
-		return cmd.CMD_MALFORMED_DATA
+		return cmd.CMD_MALFORMED_DATA, nil
 	}
 
 	user := s.User(userID)
@@ -77,12 +86,12 @@ func (s *Server) cmdAddService(userID string, data []byte) uint8 {
 
 	if limit == 0 {
 		s.conf.Log.Inff("Services limit is 0 => user: %s | net: %s", userID, service.Net)
-		return cmd.CMD_NOT_AVAILABLE
+		return cmd.CMD_NOT_AVAILABLE, nil
 	}
 
 	if user.services.count(service.Net) >= limit {
 		s.conf.Log.Inff("Services limit reached => user: %s | net: %s | limit: %d", userID, service.Net, s.conf.LimitFN(userID, service.Net))
-		return cmd.CMD_SERVICES_LIMIT
+		return cmd.CMD_SERVICES_LIMIT, nil
 	}
 
 	s.conf.Log.Inff("Command [ADD_SERVICE] => user: %s | net: %s | port: %d | id: %d", userID, service.Net, service.Port, service.ID)
@@ -90,7 +99,7 @@ func (s *Server) cmdAddService(userID string, data []byte) uint8 {
 	// Add service to server user services list.
 	_, status := user.services.add(&service)
 
-	return status
+	return status, &service
 }
 
 func (s *Server) cmdRemService(userID string, data []byte) uint8 {

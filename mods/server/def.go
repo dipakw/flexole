@@ -17,6 +17,8 @@ type Config struct {
 	Log     logs.Log
 	KeyFN   func(id string) ([]byte, error)
 	LimitFN func(id string, kind string) int
+
+	EvtAddService func(this *Server, userID string, service *Service) []byte
 }
 
 type Auth struct {

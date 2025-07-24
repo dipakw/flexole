@@ -5,14 +5,14 @@ import (
 	"flexole/mods/cmd"
 )
 
-func (c *Client) sendCtrlCommand(safe bool, id uint8, payload []byte) error {
+func (c *Client) sendCtrlCommand(safe bool, id uint8, payload []byte) ([]byte, error) {
 	if safe {
 		c.mu.Lock()
 		defer c.mu.Unlock()
 	}
 
 	if len(c.pipesList) == 0 {
-		return errors.New("no active pipes")
+		return nil, errors.New("no active pipes")
 	}
 
 	command := cmd.New(id, payload).Pack()
@@ -30,7 +30,7 @@ func (c *Client) sendCtrlCommand(safe bool, id uint8, payload []byte) error {
 
 		// Command sent successfully.
 		if err == nil && n == len(command) {
-			buf := make([]byte, 8)
+			buf := make([]byte, 256)
 
 			// Wait for response.
 			n, err = pipe.ctrl.Read(buf)
@@ -39,8 +39,10 @@ func (c *Client) sendCtrlCommand(safe bool, id uint8, payload []byte) error {
 				response := cmd.New(0, nil).Unpack(buf)
 
 				if response.ID != cmd.CMD_STATUS_OK {
-					return errors.New(MESSAGES[response.ID])
+					err = errors.New(MESSAGES[response.ID])
 				}
+
+				return response.Data, err
 			}
 
 			break
@@ -51,5 +53,5 @@ func (c *Client) sendCtrlCommand(safe bool, id uint8, payload []byte) error {
 		}
 	}
 
-	return err
+	return nil, err
 }

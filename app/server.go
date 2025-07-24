@@ -84,6 +84,10 @@ func startServer(conf *ServerConfig) (*server.Server, error) {
 
 			return 0
 		},
+
+		EvtAddService: func(this *server.Server, userID string, service *server.Service) []byte {
+			return []byte(fmt.Sprintf(`Remote info: %s/%d`, service.Net, service.Port))
+		},
 	})
 
 	if err != nil {
