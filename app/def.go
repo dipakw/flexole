@@ -49,7 +49,8 @@ type LogOut struct {
  */
 type ServerConfig struct {
 	Version string `yaml:"version"`
-	Config  *Addr  `yaml:"config"`
+	Bind    *Addr  `yaml:"bind"`
+	Dir     string `yaml:"dir"`
 	Logs    *Logs  `yaml:"logs"`
 	Users   []User `yaml:"users"`
 }

@@ -19,6 +19,7 @@ Commands:
 Options (server):
   --config, -c    Path to server config file (default: server.yml)
   --quick, -q     Quick start with user key
+  --dir, -d       Directory for server data (default: system temp dir)
   --user, -u      User ID (default: quick)
   --log, -o       Log levels: i=info, w=warn, e=error (default: iwe)
   --host, -h      Server host (default: 0.0.0.0)
@@ -51,6 +52,7 @@ Notes:
 
 var parseArgs = map[string]bool{
 	"--quick":   true,
+	"--dir":     true,
 	"--user":    true,
 	"--config":  true,
 	"--log":     true,
@@ -67,6 +69,7 @@ var parseArgs = map[string]bool{
 
 var parseArgsShort = map[string]bool{
 	"-q": true,
+	"-d": true,
 	"-u": true,
 	"-c": true,
 	"-o": true,
@@ -83,6 +86,7 @@ var parseArgsShort = map[string]bool{
 
 var mapShortToLong = map[string]string{
 	"-q": "--quick",
+	"-d": "--dir",
 	"-u": "--user",
 	"-c": "--config",
 	"-o": "--log",

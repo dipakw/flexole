@@ -46,3 +46,11 @@ func NetAddrDefault(network string, addr string, defaultHost string) (string, er
 
 	return net.JoinHostPort(host, port), nil
 }
+
+func StrOr(str string, or string) string {
+	if str == "" {
+		return or
+	}
+
+	return str
+}

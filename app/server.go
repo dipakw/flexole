@@ -11,8 +11,10 @@ import (
 )
 
 func startServer(conf *ServerConfig) (*server.Server, error) {
+	dir := util.StrOr(conf.Dir, os.TempDir())
+
 	manager := services.Manager(&services.Config{
-		Dir: "./tmp", // TODO: make it configurable
+		Dir: dir,
 	})
 
 	defer manager.Reset()
@@ -28,7 +30,7 @@ func startServer(conf *ServerConfig) (*server.Server, error) {
 		},
 	})
 
-	addr, err := util.NetAddr(conf.Config.Addr, DEFAULT_PORT)
+	addr, err := util.NetAddr(conf.Bind.Addr, DEFAULT_PORT)
 
 	if err != nil {
 		return nil, err
@@ -41,7 +43,7 @@ func startServer(conf *ServerConfig) (*server.Server, error) {
 	}
 
 	flexole, err := server.New(&server.Config{
-		Net:     conf.Config.Net,
+		Net:     conf.Bind.Net,
 		Addr:    addr,
 		Manager: manager,
 		Log:     logger,

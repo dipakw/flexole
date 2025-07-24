@@ -1,8 +1,10 @@
 version: 1.0.0
 
-config:
+bind:
   net: tcp
   addr: localhost:8887
+
+dir: ./tmp
 
 logs:
   allow:

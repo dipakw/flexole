@@ -17,6 +17,7 @@ func getServerConfig() (*ServerConfig, error) {
 		"host":   "0.0.0.0",
 		"port":   DEFAULT_PORT,
 		"user":   "quick",
+		"dir":    os.TempDir(),
 	})
 
 	args := cli.Gets(
@@ -26,6 +27,7 @@ func getServerConfig() (*ServerConfig, error) {
 		"host",
 		"port",
 		"user",
+		"dir",
 	)
 
 	if args["quick"].Passed && !args["config"].Passed {
@@ -61,10 +63,12 @@ func prepareQuickServerConfig(args map[string]*CliArg) (*ServerConfig, error) {
 	config := &ServerConfig{
 		Version: "1.0.0",
 
-		Config: &Addr{
+		Bind: &Addr{
 			Net:  "tcp",
 			Addr: net.JoinHostPort(args["host"].Value(), args["port"].Value()),
 		},
+
+		Dir: args["dir"].Value(),
 
 		Logs: &Logs{
 			Allow: util.LogShortToKinds(args["log"].Value()),
