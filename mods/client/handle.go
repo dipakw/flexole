@@ -88,6 +88,12 @@ func (c *Client) handle(pipeId string, stream *smux.Stream) {
 
 	service, ok := c.servicesList[serviceID]
 
+	if service != nil {
+		c.conf.Log.Inff("Requested service => id: %d | net: %s | pipe: %s", serviceID, service.Local.Net, pipeId)
+	} else {
+		c.conf.Log.Inff("Requested service => id: %d | pipe: %s", serviceID, pipeId)
+	}
+
 	if !ok {
 		c.conf.Log.Wrnf("Service not found => pipe: %s | id: %d", pipeId, serviceID)
 		return

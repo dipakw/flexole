@@ -10,6 +10,8 @@ import (
 )
 
 func (ss *Services) Add(s *Service) (uint16, error) {
+	ss.c.conf.Log.Inff("Adding service => id: %d | local: %s/%s | remote: %s/%d@%s", s.Remote.ID, s.Local.Net, s.Local.Addr, s.Remote.Net, s.Remote.Port, ss.c.conf.Server.Addr)
+
 	if ss.Has(s.Remote.ID) {
 		return 0, fmt.Errorf("id %d already exists", s.Remote.ID)
 	}
@@ -32,8 +34,10 @@ func (ss *Services) Add(s *Service) (uint16, error) {
 
 	ss.c.wg.Add(1)
 
+	ss.c.conf.Log.Inff("Service added => id: %d | local: %s/%s", s.Remote.ID, s.Local.Net, s.Local.Addr)
+
 	if msg != nil {
-		ss.c.conf.Log.Must(logs.INFO, nil, string(msg))
+		ss.c.conf.Log.Mustf(logs.INFO, logs.DTAG, "Local info: %s/%s | %s", s.Local.Net, s.Local.Addr, string(msg))
 	}
 
 	return s.Remote.ID, nil

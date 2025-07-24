@@ -18,6 +18,8 @@ func (pp *Pipes) Add(id string, encrypt bool) error {
 		return err
 	}
 
+	pp.c.conf.Log.Inff("Adding pipe => id: %s | encrypted: %v", id, encrypt)
+
 	// Authenticate.
 	auth := auth.Client(conn, &auth.ClientOpts{
 		ID:      pp.c.conf.ID,
@@ -84,6 +86,8 @@ func (pp *Pipes) Add(id string, encrypt bool) error {
 		sess:   sess,
 		ctrl:   ctrl,
 	}
+
+	pp.c.conf.Log.Inff("Pipe added => id: %s | encrypted: %v", id, encrypt)
 
 	go pp.c.listen(id)
 
