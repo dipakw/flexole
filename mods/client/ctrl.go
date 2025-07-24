@@ -3,7 +3,6 @@ package client
 import (
 	"errors"
 	"flexole/mods/cmd"
-	"fmt"
 )
 
 func (c *Client) sendCtrlCommand(safe bool, id uint8, payload []byte) error {
@@ -13,7 +12,7 @@ func (c *Client) sendCtrlCommand(safe bool, id uint8, payload []byte) error {
 	}
 
 	if len(c.pipesList) == 0 {
-		return errors.New("no pipes available")
+		return errors.New("no active pipes")
 	}
 
 	command := cmd.New(id, payload).Pack()
@@ -39,10 +38,8 @@ func (c *Client) sendCtrlCommand(safe bool, id uint8, payload []byte) error {
 			if err == nil {
 				response := cmd.New(0, nil).Unpack(buf)
 
-				fmt.Println("Response:", response)
-
 				if response.ID != cmd.CMD_STATUS_OK {
-					return fmt.Errorf("status code: %d", response.ID)
+					return errors.New(MESSAGES[response.ID])
 				}
 			}
 

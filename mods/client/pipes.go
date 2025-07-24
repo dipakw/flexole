@@ -44,7 +44,7 @@ func (pp *Pipes) Add(id string, encrypt bool) error {
 	})
 
 	if !auth.Ok() {
-		return fmt.Errorf("auth failed: %s : %s", auth.Err().Reason(), auth.Err().Main().Error())
+		return fmt.Errorf("Authentication error: %s : %s", auth.Err().Reason(), auth.Err().Main().Error())
 	}
 
 	useConn := conn
@@ -56,13 +56,13 @@ func (pp *Pipes) Add(id string, encrypt bool) error {
 		})
 
 		if err != nil {
-			return err
+			return fmt.Errorf("Failed to create encrypted connection => pipe: %s | error: %s", id, err.Error())
 		}
 	}
 
 	// Send OK
 	if _, err := useConn.Write([]byte("OK")); err != nil {
-		return err
+		return fmt.Errorf("Failed to send OK => pipe: %s | error: %s", id, err.Error())
 	}
 
 	sess, err := smux.Client(useConn, smux.DefaultConfig())
@@ -71,7 +71,7 @@ func (pp *Pipes) Add(id string, encrypt bool) error {
 	ctrl, err := pp.c.setupCtrlChan(sess)
 
 	if err != nil {
-		return err
+		return fmt.Errorf("Failed to setup control channel => pipe: %s | error: %s", id, err.Error())
 	}
 
 	pp.c.mu.Lock()
@@ -84,8 +84,6 @@ func (pp *Pipes) Add(id string, encrypt bool) error {
 		sess:   sess,
 		ctrl:   ctrl,
 	}
-
-	pp.c.wg.Add(1)
 
 	go pp.c.listen(id)
 

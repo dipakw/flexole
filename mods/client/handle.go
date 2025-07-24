@@ -4,7 +4,6 @@ import (
 	"errors"
 	"flexole/mods/cmd"
 	"flexole/mods/util"
-	"fmt"
 	"io"
 	"net"
 
@@ -27,7 +26,7 @@ func (c *Client) setupCtrlChan(sess *smux.Session) (*smux.Stream, error) {
 	}
 
 	if (&cmd.Cmd{}).Unpack(buf[:n]).ID != cmd.CMD_OPEN_CTRL_CHAN {
-		return nil, errors.New("invalid ctrl chan command")
+		return nil, errors.New("received non-open-ctrl-chan command")
 	}
 
 	return stream, nil
@@ -47,35 +46,41 @@ func (c *Client) listen(pipeId string) {
 			stream, err := pipe.sess.AcceptStream()
 
 			if err != nil {
-				fmt.Println("ERR:", err, err == io.EOF)
+				if err != io.EOF {
+					c.conf.Log.Errf("Failed to accept stream => pipe: %s | error: %s", pipeId, err.Error())
+				}
+
 				return
 			}
 
-			go c.handle(stream)
+			go c.handle(pipeId, stream)
 		}
 	}
 }
 
-func (c *Client) handle(stream *smux.Stream) {
+func (c *Client) handle(pipeId string, stream *smux.Stream) {
 	defer stream.Close()
 
 	buf := make([]byte, 8)
 	n, err := stream.Read(buf)
 
 	if err != nil {
-		fmt.Println("Failed to read from stream:", err)
+		if err != io.EOF {
+			c.conf.Log.Errf("Failed to read from stream => pipe: %s | error: %s", pipeId, err.Error())
+		}
+
 		return
 	}
 
 	command := (&cmd.Cmd{}).Unpack(buf[:n])
 
 	if command == nil {
-		fmt.Println("Failed to unpack command")
+		c.conf.Log.Errf("Failed to unpack command => pipe: %s | data: %v", pipeId, buf[:n])
 		return
 	}
 
 	if command.ID != cmd.CMD_CONNECT {
-		fmt.Println("Invalid command:", command.ID)
+		c.conf.Log.Errf("Received non-connect command => pipe: %s | command: %d", pipeId, command.ID)
 		return
 	}
 
@@ -84,7 +89,7 @@ func (c *Client) handle(stream *smux.Stream) {
 	service, ok := c.servicesList[serviceID]
 
 	if !ok {
-		fmt.Println("Service not found:", serviceID)
+		c.conf.Log.Wrnf("Service not found => pipe: %s | id: %d", pipeId, serviceID)
 		return
 	}
 
@@ -92,7 +97,7 @@ func (c *Client) handle(stream *smux.Stream) {
 		conn, err := net.Dial(service.Local.Net, service.Local.Addr)
 
 		if err != nil {
-			fmt.Println("Failed to dial service:", err)
+			c.conf.Log.Errf("Failed to connect => pipe: %s | error: %s", pipeId, err.Error())
 			return
 		}
 
@@ -106,7 +111,7 @@ func (c *Client) handle(stream *smux.Stream) {
 		return
 	}
 
-	fmt.Println("Service not supported:", service.Local.Net)
+	c.conf.Log.Errf("Unsupported service => pipe: %s | net: %s", pipeId, service.Local.Net)
 
 	return
 }

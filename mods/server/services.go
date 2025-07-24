@@ -34,6 +34,7 @@ func (ss *Services) add(service *Service) (*Service, uint8) {
 
 	if err != nil {
 		if strings.Contains(err.Error(), "address already in use") {
+			ss.server.conf.Log.Wrnf("Failed to start service => user: %s | net: %s | port: %d | id: %d | error: %s", ss.user.id, service.Net, service.Port, service.ID, err.Error())
 			return nil, cmd.CMD_PORT_UNAVAIL
 		}
 

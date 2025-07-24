@@ -2,9 +2,11 @@ package client
 
 import (
 	"context"
+	"flexole/mods/cmd"
 	"net"
 	"sync"
 
+	"github.com/dipakw/logs"
 	"github.com/xtaci/smux"
 )
 
@@ -12,10 +14,22 @@ const (
 	MAX_UDP_PACKET_SIZE = 65535
 )
 
+var MESSAGES = map[uint8]string{
+	cmd.CMD_STATUS_UNKNOWN: "unknown status",
+	cmd.CMD_INVALID_CMD:    "invalid command",
+	cmd.CMD_MALFORMED_DATA: "malformed data",
+	cmd.CMD_PORT_UNAVAIL:   "port not available",
+	cmd.CMD_OP_FAILED:      "operation failed",
+	cmd.CMD_SERVICES_LIMIT: "services limit reached",
+	cmd.CMD_PIPES_LIMIT:    "pipes limit reached",
+	cmd.CMD_NOT_AVAILABLE:  "not available",
+}
+
 type Config struct {
 	ID     []byte
 	Key    []byte
 	Server *Addr
+	Log    logs.Log
 }
 
 type Client struct {

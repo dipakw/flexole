@@ -24,6 +24,7 @@ func startClient(conf *ClientConfig) {
 	tunnel, err := client.New(&client.Config{
 		ID:  []byte(conf.Auth.ID),
 		Key: []byte(conf.Auth.Key),
+		Log: logger,
 
 		Server: &client.Addr{
 			Net:  conf.Server.Net,
@@ -73,7 +74,7 @@ func startClient(conf *ClientConfig) {
 		})
 
 		if err != nil {
-			logger.Err(err)
+			logger.Errf("Failed to add service => id: %d | error: %s", service.ID, err.Error())
 		}
 	}
 

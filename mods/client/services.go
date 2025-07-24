@@ -8,6 +8,10 @@ import (
 )
 
 func (ss *Services) Add(s *Service) (uint16, error) {
+	if ss.Has(s.Remote.ID) {
+		return 0, fmt.Errorf("id %d already exists", s.Remote.ID)
+	}
+
 	jsonBytes, err := json.Marshal(s.Remote)
 
 	if err != nil {
@@ -22,6 +26,8 @@ func (ss *Services) Add(s *Service) (uint16, error) {
 	defer ss.c.mu.Unlock()
 	ss.c.servicesList[s.Remote.ID] = s
 
+	ss.c.wg.Add(1)
+
 	return s.Remote.ID, nil
 }
 
@@ -29,8 +35,8 @@ func (ss *Services) Rem(id uint16) error {
 	ss.c.mu.Lock()
 	defer ss.c.mu.Unlock()
 
-	if service, ok := ss.c.servicesList[id]; !ok || service == nil {
-		return fmt.Errorf("service not found: %d", id)
+	if !ss.hasUnsafe(id) {
+		return nil
 	}
 
 	if err := ss.c.sendCtrlCommand(false, cmd.CMD_REM_SERVICE, util.PackUint16(id)); err != nil {
@@ -40,4 +46,15 @@ func (ss *Services) Rem(id uint16) error {
 	delete(ss.c.servicesList, id)
 
 	return nil
+}
+
+func (ss *Services) Has(id uint16) bool {
+	ss.c.mu.RLock()
+	defer ss.c.mu.RUnlock()
+	return ss.hasUnsafe(id)
+}
+
+func (ss *Services) hasUnsafe(id uint16) bool {
+	s, ok := ss.c.servicesList[id]
+	return ok && s != nil
 }
