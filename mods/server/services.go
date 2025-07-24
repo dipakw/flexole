@@ -4,6 +4,7 @@ import (
 	"flexole/mods/cmd"
 	"flexole/mods/services"
 	"net"
+	"strings"
 	"time"
 )
 
@@ -19,8 +20,6 @@ func (ss *Services) add(service *Service) (*Service, uint8) {
 		return nil, cmd.CMD_PORT_UNAVAIL
 	}
 
-	ss.user.servicesList[service.ID] = service
-
 	_, err := user.Start(&services.Service{
 		ID:      service.ID,
 		Host:    "",
@@ -34,9 +33,15 @@ func (ss *Services) add(service *Service) (*Service, uint8) {
 	})
 
 	if err != nil {
+		if strings.Contains(err.Error(), "address already in use") {
+			return nil, cmd.CMD_PORT_UNAVAIL
+		}
+
 		ss.server.conf.Log.Errf("Failed to start service => user: %s | net: %s | port: %d | id: %d | error: %s", ss.user.id, service.Net, service.Port, service.ID, err.Error())
 		return nil, cmd.CMD_OP_FAILED
 	}
+
+	ss.user.servicesList[service.ID] = service
 
 	ss.server.conf.Log.Inff("Service added => user: %s | net: %s | port: %d | id: %d", ss.user.id, service.Net, service.Port, service.ID)
 
