@@ -33,7 +33,7 @@ Options (client):
   --log, -o        Log levels: i=info, w=warn, e=error (default: iwe)
   --local, -l      Local address, e.g. tcp/localhost:8080
   --remote, -r     Remote, e.g. tcp/80@192.168.1.100
-  --id             Service ID (0-65535)
+  --id, -i         Service ID (0-65535)
   --encrypt, -e    Enable encryption (default: 1)
 
 Options (generate):
