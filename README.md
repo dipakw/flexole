@@ -16,85 +16,24 @@
 4. **Configurable number of connections (pipes)**  
    Each service can use one or more dedicated connections (pipes). When multiple pipes are configured, requests are distributed using round-robin.
 
-## Getting started
-Download the appropriate binary file for your OS.
+## Quick start
+Download the appropriate binary file for your OS from [releases](https://github.com/dipakw/flexole/releases).
 
-### Quick
+### Start the server
 
 ```bash
-flexole server --quick
-```
-
-Short
-```
 flexole s -q
 ```
 
-### Expose local service
-```bash
-flexole client --quick --local=tcp/8080 --remote=tcp/80@server.com --id=100
-```
 
-Short
-```bash
-flexole c -q -l=tcp/8080 -r=tcp/80@server.com -i=100
-```
+### Forward local services
 
------------
+| Protocol | Example                                                                 |
+|----------|-------------------------------------------------------------------------|
+| TCP      | `flexole c -q -l=tcp/8080 -r=tcp/12000@server.addr -i=1`                |
+| UNIX     | `flexole c -q -l=unix//path/to.sock -r=tcp/12001@server.addr -i=2`      |
+| UDP      | `flexole c -q -l=udp/5353 -r=udp/53@server.addr -i=3`                   |
 
-### Using config files
-
-#### Server
-
-Generate a server config file, it generates a sample `server.yml`.
-
-```bash
-flexole generate --server-config
-```
-
-Or if you want a custom filename
-
-```bash
-flexole generate --server-config=myserver.yml
-```
-
-Start the server.
-
-```bash
-flexole server
-```
-
-Or to use a custom config file
-
-```bash
-flexole server --config=myserver.yml
-```
-
-#### Client
-
-Generate a client config file, it generates a sample `client.yml`.
-
-```bash
-flexole generate --client-config
-```
-
-Or if you want a custom filename
-
-```bash
-flexole generate --client-config=myclient.yml
-```
-
-Start the client.
-
-```bash
-flexole client
-```
-
-Or to use a custom config file
-
-```bash
-flexole client --config=myclient.yml
-```
 
 ## CLI usage
 
