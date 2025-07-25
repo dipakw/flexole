@@ -1,3 +1,7 @@
+![Latest Release](https://img.shields.io/github/v/release/dipakw/flexole)
+![Build](https://github.com/dipakw/flexole/actions/workflows/release.yml/badge.svg)
+![License](https://img.shields.io/github/license/dipakw/flexole)
+
 # flexole
 
 **Flexole** is a lightweight, fast, and secure reverse proxy written in Go. It supports encrypted communication between local and remote servers, uses quantum-safe authentication, can be embedded into Go applications, and is designed to work in multi-user environments.
