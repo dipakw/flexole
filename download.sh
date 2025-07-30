@@ -7,6 +7,7 @@ GREEN="\033[0;32m"
 YELLOW="\033[1;33m"
 RED="\033[0;31m"
 RESET="\033[0m"
+NAME="flexole"
 
 info() { echo "${YELLOW}➤ $1${RESET}"; }
 success() { echo "${GREEN}✔ $1${RESET}"; }
@@ -38,7 +39,7 @@ case "$ARCH" in
 esac
 
 # Fetch latest version from GitHub API
-REPO="dipakw/flexole"
+REPO="dipakw/${NAME}"
 info "Fetching latest version from GitHub..."
 
 VERSION=$(curl -fsSL "https://api.github.com/repos/${REPO}/releases/latest" | sed -n 's/.*"tag_name": "v\([^"]*\)".*/\1/p')
@@ -48,7 +49,7 @@ if [ -z "$VERSION" ]; then
     exit 1
 fi
 
-FILENAME="flexole-${OS}-${ARCH}.zip"
+FILENAME="${NAME}-${OS}-${ARCH}.zip"
 URL="https://github.com/${REPO}/releases/download/v${VERSION}/${FILENAME}"
 
 info "Detected OS: $OS"
@@ -63,9 +64,9 @@ unzip -o -q "$FILENAME" || { error "Failed to unzip $FILENAME"; exit 1; }
 
 # Set executable permissions if needed
 if [ "$OS" != "windows" ]; then
-    chmod +x flexole
+    chmod +x "${NAME}"
 fi
 
 rm -f "$FILENAME"
 
-success "flexole v${VERSION} downloaded successfully!"
+success "${NAME} v${VERSION} downloaded successfully!"
