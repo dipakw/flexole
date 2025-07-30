@@ -26,17 +26,17 @@
 curl -sL https://bit.ly/flexole-dl | sh
 ```
 
-## Quick start
+## Quick Start
 Download the appropriate binary file for your OS from [releases](https://github.com/dipakw/flexole/releases) or the commands above.
 
-### Start the server
+### Start The Server
 
 ```bash
 flexole s -q
 ```
 
 
-### Forward local services
+### Forward Local Services
 
 | Protocol | Example                                                                 |
 |----------|-------------------------------------------------------------------------|
@@ -45,7 +45,7 @@ flexole s -q
 | UDP      | `flexole c -q -l=udp/5353 -r=udp/53@server.addr -i=3`                   |
 
 
-## CLI usage
+## CLI Usage
 
 ```
 Usage:
