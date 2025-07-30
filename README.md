@@ -20,8 +20,14 @@
 4. **Configurable number of connections (pipes)**  
    Each service can use one or more dedicated connections (pipes). When multiple pipes are configured, requests are distributed using round-robin.
 
+## Download
+
+```bash
+curl --silent https://raw.githubusercontent.com/dipakw/flexole/refs/heads/main/download.sh | sh
+```
+
 ## Quick start
-Download the appropriate binary file for your OS from [releases](https://github.com/dipakw/flexole/releases).
+Download the appropriate binary file for your OS from [releases](https://github.com/dipakw/flexole/releases) or the commands above.
 
 ### Start the server
 
