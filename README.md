@@ -45,6 +45,12 @@ flexole s -q
 | UDP      | `flexole c -q -l=udp/5353 -r=udp/53@server.addr -i=3`                   |
 
 
+### Forward built-in services
+
+| Service         | Example                                                    |
+|-----------------|------------------------------------------------------------|
+| Speed Testing   | `flexole c -q -l=v/speed -r=tcp/12002@server.addr -i=4`    |
+
 ## CLI Usage
 
 ```
