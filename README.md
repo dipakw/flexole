@@ -23,7 +23,7 @@
 ## Download
 
 ```bash
-curl -sL https://bit.ly/flexole-dl | sh
+curl -sL https://dipakw.github.io/scripts/flexole-dl | sh
 ```
 
 ## Quick Start
