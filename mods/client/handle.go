@@ -89,7 +89,7 @@ func (c *Client) handle(pipeId string, stream *smux.Stream) {
 	service, ok := c.servicesList[serviceID]
 
 	if service != nil {
-		c.conf.Log.Inff("Requested service => id: %d | net: %s | pipe: %s", serviceID, service.Local.Net, pipeId)
+		c.conf.Log.Inff("Requested service => id: %d | net: %s | addr: %s | pipe: %s", serviceID, service.Local.Net, service.Local.Addr, pipeId)
 	} else {
 		c.conf.Log.Inff("Requested service => id: %d | pipe: %s", serviceID, pipeId)
 	}
@@ -117,7 +117,18 @@ func (c *Client) handle(pipeId string, stream *smux.Stream) {
 		return
 	}
 
-	c.conf.Log.Errf("Unsupported service => pipe: %s | net: %s", pipeId, service.Local.Net)
+	if service.Local.Net == "v" {
+		if service.Local.Addr == "speed" {
+			c.vSpeed(stream)
+			return
+		}
+
+		c.conf.Log.Errf("Service not found => pipe: %s | id: %d | net: %s | addr: %s", pipeId, serviceID, service.Local.Net, service.Local.Addr)
+
+		return
+	}
+
+	c.conf.Log.Errf("Unsupported service => pipe: %s | id: %d | net: %s | addr: %s", pipeId, serviceID, service.Local.Net, service.Local.Addr)
 
 	return
 }

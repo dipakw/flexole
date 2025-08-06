@@ -137,6 +137,13 @@ func parseClientLocalArg(arg *CliArg) (*Addr, error) {
 		return nil, fmt.Errorf("Required argument %s is missing", arg.Name)
 	}
 
+	if val == "speed" || val == "v/speed" {
+		return &Addr{
+			Net:  "v",
+			Addr: "speed",
+		}, nil
+	}
+
 	invalidFormat := fmt.Errorf(`Invalid argument %s, format: [protocol]/[address], example: tcp/localhost:8080`, arg.Name)
 	parts := strings.SplitN(val, "/", 2)
 

@@ -1,1 +1,2 @@
 CGO_ENABLED=0 go build -a -ldflags="-s -w" -gcflags=all="-l -B -C"
+ls -lah | grep flexole
