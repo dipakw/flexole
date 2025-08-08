@@ -8,7 +8,7 @@ import (
 )
 
 var byrateConfig = &handle.Config{
-	Version: "0.2.0",
+	Version: "0.2.1",
 }
 
 func (c *Client) vSpeed(stream *smux.Stream) {

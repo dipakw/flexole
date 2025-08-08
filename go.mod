@@ -3,6 +3,7 @@ module flexole
 go 1.24.5
 
 require (
+	github.com/dipakw/byrate v0.2.1
 	github.com/dipakw/logs v1.3.0
 	github.com/dipakw/uconn v1.1.2
 	github.com/xtaci/smux v1.5.34
@@ -10,7 +11,6 @@ require (
 )
 
 require (
-	github.com/dipakw/byrate v0.2.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d // indirect

@@ -1,9 +1,5 @@
-github.com/dipakw/byrate v0.2.0 h1:PKwtbVItVf2rAjajmD8Vu9KopCgbyX5Q7dgVSeiH8Uk=
-github.com/dipakw/byrate v0.2.0/go.mod h1:mZcmLv7tRp0uPbB82DCUNX90SPHZ/z6HE03lC19F6X0=
-github.com/dipakw/logs v1.1.0 h1:9rGhW6ifJf/hKfTSKJAGknTWtMfJoeyihpkFWeD2NLM=
-github.com/dipakw/logs v1.1.0/go.mod h1:MpTUrX63R/7QKnxBvwCnLh5slKhtAWTOO6bl8dCM4Xs=
-github.com/dipakw/logs v1.2.0 h1:6E+a7j0qC7sPPazDEIE+s/yBbv1ZSHGYTV/gnDOWfQU=
-github.com/dipakw/logs v1.2.0/go.mod h1:MpTUrX63R/7QKnxBvwCnLh5slKhtAWTOO6bl8dCM4Xs=
+github.com/dipakw/byrate v0.2.1 h1:lqeOpPDedmmeJFL/Hjo1llIdNbMn2zZm/p5TfJyz9Nw=
+github.com/dipakw/byrate v0.2.1/go.mod h1:mZcmLv7tRp0uPbB82DCUNX90SPHZ/z6HE03lC19F6X0=
 github.com/dipakw/logs v1.3.0 h1:miNJqESTw34L4XJDofwN4xQ5W+UTne1r4tbyFi8YfJI=
 github.com/dipakw/logs v1.3.0/go.mod h1:MpTUrX63R/7QKnxBvwCnLh5slKhtAWTOO6bl8dCM4Xs=
 github.com/dipakw/uconn v1.1.2 h1:JoA94cryqXDdr8lxAT4r/UGTBvKk9UfdeC2Ivg47eOI=
