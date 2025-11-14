@@ -41,6 +41,10 @@ func startClient(conf *ClientConfig) {
 
 	// Add pipes.
 	for _, pipe := range conf.Pipes {
+		if !pipe.Enabled {
+			continue
+		}
+
 		if err := tunnel.Pipes.Add(pipe.ID, pipe.Encrypt); err != nil {
 			stop = true
 
@@ -59,6 +63,10 @@ func startClient(conf *ClientConfig) {
 
 	// Add services.
 	for _, service := range conf.Services {
+		if !service.Enabled {
+			continue
+		}
+
 		_, err := tunnel.Services.Add(&client.Service{
 			Local: &client.Local{
 				Net:  service.Local.Net,
