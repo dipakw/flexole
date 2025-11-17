@@ -95,7 +95,7 @@ func prepareQuickClientConfig(args map[string]*CliArg) (*ClientConfig, error) {
 		Logs: &Logs{
 			Allow: util.LogShortToKinds(args["log"].Value()),
 
-			Outs: []LogOut{
+			Outs: []*LogOut{
 				{
 					To:    "stdout",
 					Color: true,
@@ -153,7 +153,7 @@ func parseClientLocalArg(arg *CliArg) (*Addr, error) {
 
 	localNet := parts[0]
 	localAddr := parts[1]
-	localAddr, err := util.NetAddrDefault(localNet, localAddr, DEFAULT_LOCAL_HOST)
+	localAddr, err := util.NetAddrDefault(localNet, localAddr, DEFAULT_HOST)
 
 	if err != nil {
 		return nil, err
@@ -189,7 +189,7 @@ func parseClientRemoteArg(arg *CliArg) (*Addr, *NetPort, error) {
 		return nil, nil, invalidFormat
 	}
 
-	serverAddr, err := util.NetAddr(serverAddr, DEFAULT_PORT)
+	serverAddr, err := util.NetAddr(serverAddr, DEFAULT_PORT, 0, 0)
 
 	if err != nil {
 		return nil, nil, fmt.Errorf("Invalid server address: %s", err.Error())
