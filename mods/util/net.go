@@ -7,16 +7,38 @@ import (
 	"strings"
 )
 
-func NetAddr(addr string, defaultPort string) (string, error) {
+func NetAddr(addr string, defaultPort string, minPort int, maxPort int) (string, error) {
 	host, port, err := net.SplitHostPort(addr)
 
 	if err != nil {
 		if strings.Contains(err.Error(), "missing port") || port == "" {
-			host = addr
+			host = strings.TrimSuffix(addr, ":")
 			port = defaultPort
 		} else {
 			return "", err
 		}
+	}
+
+	if port == "" {
+		port = defaultPort
+	}
+
+	portInt, err := strconv.Atoi(port)
+
+	if err != nil {
+		return "", fmt.Errorf("port \"%s\" is not numeric", port)
+	}
+
+	if minPort == 0 {
+		minPort = 1
+	}
+
+	if maxPort == 0 {
+		maxPort = 65535
+	}
+
+	if portInt < minPort || portInt > maxPort {
+		return "", fmt.Errorf("port %d is not between %d and %d", portInt, minPort, maxPort)
 	}
 
 	return net.JoinHostPort(host, port), nil

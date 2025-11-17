@@ -3,8 +3,8 @@ package app
 import "embed"
 
 const (
-	DEFAULT_PORT       = "8887"
-	DEFAULT_LOCAL_HOST = "localhost"
+	DEFAULT_PORT = "8887"
+	DEFAULT_HOST = "localhost"
 )
 
 type Config struct {
@@ -41,8 +41,8 @@ type NetPort struct {
 }
 
 type Logs struct {
-	Allow []string `yaml:"allow"`
-	Outs  []LogOut `yaml:"outs"`
+	Allow []string  `yaml:"allow"`
+	Outs  []*LogOut `yaml:"outs"`
 }
 
 type LogOut struct {

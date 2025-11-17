@@ -50,9 +50,11 @@ func loadServerConfigFile(file string) (*ServerConfig, error) {
 		return nil, err
 	}
 
-	err = yaml.Unmarshal(fileBytes, &config)
+	if err := yaml.Unmarshal(fileBytes, &config); err != nil {
+		return nil, err
+	}
 
-	if err != nil {
+	if err := normalizeAndValidateServerConfig(&config); err != nil {
 		return nil, err
 	}
 
@@ -73,7 +75,7 @@ func prepareQuickServerConfig(args map[string]*CliArg) (*ServerConfig, error) {
 		Logs: &Logs{
 			Allow: util.LogShortToKinds(args["log"].Value()),
 
-			Outs: []LogOut{
+			Outs: []*LogOut{
 				{
 					To:    "stdout",
 					Color: true,
@@ -97,4 +99,48 @@ func prepareQuickServerConfig(args map[string]*CliArg) (*ServerConfig, error) {
 	}
 
 	return config, nil
+}
+
+func normalizeAndValidateServerConfig(config *ServerConfig) error {
+	if config.Bind == nil {
+		config.Bind = &Addr{
+			Net:  "tcp",
+			Addr: net.JoinHostPort(DEFAULT_HOST, DEFAULT_PORT),
+		}
+	}
+
+	if config.Logs == nil {
+		config.Logs = &Logs{
+			Allow: []string{"info", "warn", "error"},
+			Outs: []*LogOut{
+				{
+					To:    "stdout",
+					Color: true,
+				},
+			},
+		}
+	}
+
+	if config.Bind.Net == "" {
+		config.Bind.Net = "tcp"
+	}
+
+	if config.Bind.Addr == "" {
+		config.Bind.Addr = net.JoinHostPort(DEFAULT_HOST, DEFAULT_PORT)
+	}
+
+	if config.Bind.Net != "tcp" && config.Bind.Net != "unix" {
+		return fmt.Errorf("server only supports tcp and unix networks, got: %s", config.Bind.Net)
+	}
+
+	if config.Bind.Net == "tcp" {
+		var err error = nil
+		config.Bind.Addr, err = util.NetAddr(config.Bind.Addr, DEFAULT_PORT, 0, 0)
+
+		if err != nil {
+			return fmt.Errorf("invalid server address: %w", err)
+		}
+	}
+
+	return nil
 }

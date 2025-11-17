@@ -3,6 +3,8 @@ package app
 import (
 	"fmt"
 	"os"
+
+	"github.com/dipakw/logs"
 )
 
 func Run(config *Config) {
@@ -18,21 +20,32 @@ func Run(config *Config) {
 		fmt.Println("Version: " + config.Version)
 
 	case "server", "s":
+		logger := logs.New(&logs.Config{
+			Allow: logs.ALL,
+
+			Outs: []*logs.Out{
+				{
+					Target: os.Stdout,
+					Color:  true,
+				},
+			},
+		})
+
 		config, err := getServerConfig()
 
 		if err != nil {
-			fmt.Println(err)
+			logger.Err(err)
 			os.Exit(1)
 		}
 
 		server, err := startServer(config)
 
 		if err != nil {
-			fmt.Println(err)
+			logger.Err(err)
 			os.Exit(1)
 		}
 
-		fmt.Printf("Server started: %s://%s\n", server.Net(), server.Addr())
+		logger.Inff("Server started: %s://%s\n", server.Net(), server.Addr())
 
 		server.Wait()
 

@@ -30,12 +30,6 @@ func startServer(conf *ServerConfig) (*server.Server, error) {
 		},
 	})
 
-	addr, err := util.NetAddr(conf.Bind.Addr, DEFAULT_PORT)
-
-	if err != nil {
-		return nil, err
-	}
-
 	users := map[string]*User{}
 
 	for _, user := range conf.Users {
@@ -44,7 +38,7 @@ func startServer(conf *ServerConfig) (*server.Server, error) {
 
 	flexole, err := server.New(&server.Config{
 		Net:     conf.Bind.Net,
-		Addr:    addr,
+		Addr:    conf.Bind.Addr,
 		Manager: manager,
 		Log:     logger,
 
