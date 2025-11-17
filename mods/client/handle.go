@@ -129,6 +129,4 @@ func (c *Client) handle(pipeId string, stream *smux.Stream) {
 	}
 
 	c.conf.Log.Errf("Unsupported service => pipe: %s | id: %d | net: %s | addr: %s", pipeId, serviceID, service.Local.Net, service.Local.Addr)
-
-	return
 }
