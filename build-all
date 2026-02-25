@@ -64,7 +64,7 @@ for platform in "${platforms[@]}"; do
 
   mkdir -p "$output_path"
 
-  if env GOOS=$GOOS GOARCH=$GOARCH go build -a -ldflags="-s -w" -gcflags=all="-l -B -C" -o "$binary_path" . 2>/dev/null; then
+  if env CGO_ENABLED=0 GOOS=$GOOS GOARCH=$GOARCH go build -a -ldflags="-s -w" -gcflags=all="-l -B -C" -o "$binary_path" . 2>/dev/null; then
     (cd "$output_path" && zip -r "../$zip_name" "$binary_name" > /dev/null)
     COUNT=$((COUNT + 1))
   fi
