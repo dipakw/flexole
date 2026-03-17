@@ -33,6 +33,7 @@ type ValName struct {
 type Addr struct {
 	Net  string `yaml:"net"`
 	Addr string `yaml:"addr"`
+	Dir  string `yaml:"dir"`
 }
 
 type NetPort struct {

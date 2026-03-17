@@ -128,5 +128,20 @@ func (c *Client) handle(pipeId string, stream *smux.Stream) {
 		return
 	}
 
+	if service.Local.Net == "serve" {
+		dir := service.Local.Addr
+
+		if dir == "" {
+			dir = "./"
+		}
+
+		if err := c.vServe(serviceID, dir, stream); err != nil {
+			c.conf.Log.Errf("Failed to serve => pipe: %s | id: %d | error: %s", pipeId, serviceID, err.Error())
+			return
+		}
+
+		return
+	}
+
 	c.conf.Log.Errf("Unsupported service => pipe: %s | id: %d | net: %s | addr: %s", pipeId, serviceID, service.Local.Net, service.Local.Addr)
 }

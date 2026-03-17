@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"flexole/mods/cmd"
+	"flexole/mods/serve"
 	"net"
 	"sync"
 
@@ -43,6 +44,8 @@ type Client struct {
 
 	Pipes    *Pipes
 	Services *Services
+
+	serves map[uint16]*serve.Serve
 }
 
 type Addr struct {

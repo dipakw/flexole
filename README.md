@@ -47,9 +47,10 @@ flexole s -q
 
 ### Forward built-in services
 
-| Service         | Example                                                    |
-|-----------------|------------------------------------------------------------|
-| Speed Testing   | `flexole c -q -l=v/speed -r=tcp/12002@server.addr -i=4`    |
+| Service            | Example                                                                                |
+|--------------------|----------------------------------------------------------------------------------------|
+| Speed Testing      | `flexole c -q -l=v/speed -r=tcp/12002@server.addr -i=4`                                |
+| Serve Static Files | `flexole c -q -l=serve/{path_to_dir} -r=tcp/12003@server.addr -i=5`                    |
 
 ## CLI Usage
 

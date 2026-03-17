@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"flexole/mods/cmd"
+	"flexole/mods/serve"
 	"sync"
 )
 
@@ -12,6 +13,7 @@ func New(c *Config) (*Client, error) {
 		mu:           sync.RWMutex{},
 		pipesList:    map[string]*connPipe{},
 		servicesList: map[uint16]*Service{},
+		serves:       map[uint16]*serve.Serve{},
 	}
 
 	instance.Pipes = &Pipes{

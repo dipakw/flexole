@@ -144,6 +144,19 @@ func parseClientLocalArg(arg *CliArg) (*Addr, error) {
 		}, nil
 	}
 
+	if strings.HasPrefix(val, "serve") {
+		trim := "serve"
+
+		if strings.HasPrefix(val, "serve/") {
+			trim = "serve/"
+		}
+
+		return &Addr{
+			Net:  "serve",
+			Addr: strings.TrimPrefix(val, trim),
+		}, nil
+	}
+
 	invalidFormat := fmt.Errorf(`Invalid argument %s, format: [protocol]/[address], example: tcp/localhost:8080`, arg.Name)
 	parts := strings.SplitN(val, "/", 2)
 

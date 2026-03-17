@@ -60,3 +60,33 @@ services:
     pipes:
       - one
       - two
+
+  - id: 102
+    enabled: true
+
+    local:
+      net: v
+      addr: speed
+
+    remote:
+      net: tcp
+      port: 12003
+
+    pipes:
+      - one
+      - two
+
+  - id: 103
+    enabled: true
+
+    local:
+      net: serve
+      addr: /var/www/html
+
+    remote:
+      net: tcp
+      port: 12004
+
+    pipes:
+      - one
+      - two
